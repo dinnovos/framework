@@ -1,0 +1,30 @@
+{
+    "name": "kodazzi/framework",
+    "type": "library",
+    "description": "The Kodazzi PHP framework",
+    "keywords": ["framework","kodazzi","venezuela"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jorge Gaitan (Dinnovos)",
+            "email": "jgaitan@kodazzi.com",
+            "homepage": "http://kodazzi.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "symfony/http-foundation"   	:"2.*",
+        "symfony/routing"           	:"2.*",
+        "symfony/debug"             	:"2.*",
+        "symfony/console"           	:"2.*",
+        "symfony/yaml"              	:"2.*",
+        "symfony/filesystem"        	:"2.*",
+        "symfony/translation"        	:"2.*",
+		"symfony/finder"                :"2.*",
+        "twig/twig"                 	:"1.*",
+        "doctrine/dbal"             	:"2.*",
+        "phpmailer/phpmailer"       	:"5.*",
+        "ext-curl"                  	:"*",
+		"mobiledetect/mobiledetectlib"	:"*"
+    }
+}
