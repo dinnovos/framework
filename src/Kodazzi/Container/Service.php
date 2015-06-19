@@ -80,6 +80,11 @@ Class Service
         }
         elseif ($resolver instanceof \Closure)
         {
+            if(!is_array($options))
+            {
+                echo "$alias $options";
+            }
+
             $object = $resolver($options);
         }
 

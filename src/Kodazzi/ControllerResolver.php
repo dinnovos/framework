@@ -179,7 +179,7 @@ class ControllerResolver implements ControllerResolverInterface
         else
         {
             $controller = $attributes['controller'];
-            $parts = explode( ':', $controller );
+            $parts = explode( ':', str_replace('/', '\\', $controller) );
         }
 
         if( count( $parts ) == 3 )

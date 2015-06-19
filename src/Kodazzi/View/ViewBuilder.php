@@ -86,7 +86,7 @@ Class ViewBuilder
 
 		// Funcion para construir las url
 		$build_url = new \Twig_SimpleFunction('build_url', function ( $name_route, $parameters = array() ) {
-			return \AppKernel::get('url_generator')->generate( $name_route , $parameters );
+			return \Service::get('kernel.url_generator')->generate( $name_route , $parameters );
 		});
 
         // Funcion para construir las url

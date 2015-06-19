@@ -193,7 +193,7 @@ Class SchemaCommand extends Command
 		$schema = include $path_schema.'current/schema.php';
 
 		// Se crea el archivo .sql que contendra la estructura del esquema para la base de datos.
-		$querys = $schema->toSql(\Db::model()->getDriverManager()->getDatabasePlatform());
+		$querys = $schema->toSql(Service::get('db')->getDriverManager()->getDatabasePlatform());
 
 		$sql = "";
 		foreach( $querys as $query )

@@ -11,6 +11,7 @@
 namespace Kodazzi;
 
 use DetectionMobile_Detect;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Kodazzi\Config\ConfigBuilder;
@@ -90,6 +91,29 @@ Class Controller
     public function getEvent()
     {
         return Service::get('event');
+    }
+
+    /**
+     * @return Request
+     */
+    public function getRequest()
+    {
+        return Service::get('kernel.request');
+    }
+
+    public function getPOST()
+    {
+        return Service::get('kernel.request')->request->all();
+    }
+
+    public function getGET()
+    {
+        return Service::get('kernel.request')->query->all();
+    }
+
+    public function isAjax()
+    {
+        return Service::get('kernel.request')->isXmlHttpRequest();
     }
 
     /**

@@ -35,14 +35,9 @@ class Db
 
     protected $Config = null;
 
-    public function __construct(ConfigBuilderInterface $config)
+    public function __construct($connection = 'default')
     {
-        $this->Config = $config;
-    }
-
-    public function model($namespace = null, $connection = 'default')
-    {
-        $Config = $this->Config;
+        $Config = \Service::get('config');
 
         $connectionOptions = (YS_ENVIRONMENT == 'prod') ? $Config->get('db', 'prod') :  $Config->get('db', 'dev') ;
 
@@ -77,6 +72,11 @@ class Db
             throw new \Exception("El <b>Driver</b> para la conexi&oacute;n a la base de datos no es v&aacute;lido.");
         }
 
+        return $this;
+    }
+
+    public function model($namespace = null)
+    {
         if($namespace)
         {
             $this->namespace = $namespace;
@@ -87,7 +87,6 @@ class Db
 
         return $this;
     }
-
 
 	/**
 	 * @return \Doctrine\DBAL\Connection

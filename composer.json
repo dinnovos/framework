@@ -13,6 +13,8 @@
     ],
     "require": {
         "php": ">=5.3.0",
+		"symfony/http-kernel"           :"2.*",
+		"symfony/event-dispatcher"      :"2.*",
         "symfony/http-foundation"   	:"2.*",
         "symfony/routing"           	:"2.*",
         "symfony/debug"             	:"2.*",
@@ -25,6 +27,6 @@
         "doctrine/dbal"             	:"2.*",
         "phpmailer/phpmailer"       	:"5.*",
         "ext-curl"                  	:"*",
-		"mobiledetect/mobiledetectlib"	:"*"
+        "mobiledetect/mobiledetectlib"	:"2.*"
     }
 }
