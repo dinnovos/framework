@@ -57,7 +57,7 @@ Class ModelCommand extends Command
 		$bundle = trim($bundle, '/');
 		$bundle = trim($bundle, '\\');
 
-        $path_schema = YS_APP . 'storage/schemas/';
+        $path_schema = YS_APP . 'src/storage/schemas/';
 
         if($version === null)
         {

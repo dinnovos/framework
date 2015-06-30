@@ -41,13 +41,13 @@ Class InterfaceForm implements \ArrayAccess
 
 	public function __construct( $instance_model = null )
 	{
-		$this->I18n = \AppKernel::get( 'i18n' );
+		$this->I18n = \Service::get('translator');
 		
 		// token para campo csrf del form
 		$this->csrf_token = sha1( get_class($this) );
 
 		// Nombre de la clase formulario
-		$this->name_form = basename( str_replace('\\', '/', get_class($this)) );
+		$this->name_form = basename(str_replace('\\', '/', get_class($this)));
 
 		// Llama a config() de la clase base
 		$this->config();
@@ -56,7 +56,7 @@ Class InterfaceForm implements \ArrayAccess
 		$this->change();
 
 		// Crea el widget para seguridad de ataque csrf
-		$this->setWidget( 'csrf_token', new \Kodazzi\Form\Fields\Csfr() )->setValue( $this->csrf_token );
+		$this->setWidget('csrf_token', new \Kodazzi\Form\Fields\Csfr())->setValue($this->csrf_token);
 
 		if( $instance_model )
 		{

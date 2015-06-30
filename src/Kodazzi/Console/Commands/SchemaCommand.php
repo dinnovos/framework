@@ -52,7 +52,7 @@ Class SchemaCommand extends Command
 
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-        $path_schema = YS_APP . 'storage/schemas/';
+        $path_schema = YS_APP . 'src/storage/schemas/';
 		$action = $input->getArgument('action');
 		$behavior = $input->getArgument('behavior');
         $yaml = new Parser();
@@ -168,18 +168,18 @@ Class SchemaCommand extends Command
 			}
 		}
 
-		// Crea el directorio storage/schema/current
+		// Crea el directorio src/storage/schema/current
 		$this->mkdir( $path_schema.'current' );
 
 		// vuelca el arreglo PHP a YAML
 		$dumper = new Dumper();
 		$content_yaml = $dumper->dump( $schema );
 
-		// Crea el archivo yml dentro de storage/schema/current.
+		// Crea el archivo yml dentro de src/storage/schema/current.
 		$fs->dumpFile( $path_schema.'current/schema.yml', $content_yaml);
 		$output->writeln( PHP_EOL." <info>- Se genero el archivo schema.yml correctamente.</info>" );
 
-		// Crea el archivo yml dentro de storage/schema/current.
+		// Crea el archivo yml dentro de src/storage/schema/current.
 		$content_readme = 'Creado: '.$dateTime->format('Y-m-d H:i:s');
 		$fs->dumpFile($path_schema.'current/readme.md', $content_readme);
 		$output->writeln(" <info>- Se genero el archivo readme.md correctamente.</info>");
@@ -204,7 +204,7 @@ Class SchemaCommand extends Command
 		$fs->dumpFile($path_schema.'current/database.sql',$sql);
 		$output->writeln(" <info>- Se genero el archivo database.sql correctamente.</info>");
 
-		$output->writeln( PHP_EOL." <info>EL esquema fue creado correctamente en: ".YS_SYSTEM."app/storage/schemas/current/</info>" );
+		$output->writeln( PHP_EOL." <info>EL esquema fue creado correctamente en: ".YS_SYSTEM."app/src/storage/schemas/current/</info>" );
 	}
 
 	private function freezeSchema( $input, $output, $path_schema, $schema )

@@ -14,9 +14,11 @@ use DetectionMobile_Detect;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 use Kodazzi\Config\ConfigBuilder;
 use Kodazzi\EventDispatcher\Event;
 use Kodazzi\Orm\Db;
+use Kodazzi\Form\FormBuilder;
 use Kodazzi\Session\SessionBuilder;
 use Kodazzi\Translator\TranstalorBuilder;
 use Kodazzi\View\ViewBuilder;
@@ -24,6 +26,9 @@ use Service;
 
 Class Controller
 {
+    protected function preAction(){}
+    protected function postAction(){}
+
     /**
      * @return Response
      */
@@ -86,6 +91,14 @@ Class Controller
     }
 
     /**
+     * @return FormBuilder
+     */
+    public function getForm($namespace, $instance = null)
+    {
+        return new $namespace($instance);
+    }
+
+    /**
      * @return Event
      */
     public function getEvent()
@@ -111,11 +124,6 @@ Class Controller
         return Service::get('kernel.request')->query->all();
     }
 
-    public function isAjax()
-    {
-        return Service::get('kernel.request')->isXmlHttpRequest();
-    }
-
     /**
      * @return DetectionMobile_Detect
      */
@@ -129,6 +137,25 @@ Class Controller
         return $this->getView()->render($template, $data);
     }
 
+    public function isAjax()
+    {
+        return Service::get('kernel.request')->isXmlHttpRequest();
+    }
+
+    public function isPost()
+    {
+        $post = $this->getPOST();
+
+        return (is_array($post) && count($post)) ? true : false;
+    }
+
+    public function isGet()
+    {
+        $get = $this->getGET();
+
+        return (is_array($get) && count($get)) ? true : false;
+    }
+
     public function render($template, $data = array())
     {
         return new Response($this->getView()->render($template, $data));
@@ -136,7 +163,12 @@ Class Controller
 
     public function buildUrl($route, $parameters = array())
     {
-        return Service::get('kernel.url_generator')->generate( $route, $parameters);
+        return \Kodazzi\Tools\Util::buildUrl($route, $parameters);
+    }
+
+    public function redirectResponse( $url, $status = 302 )
+    {
+        return new RedirectResponse( $url, $status );
     }
 
     public function jsonResponse($data)

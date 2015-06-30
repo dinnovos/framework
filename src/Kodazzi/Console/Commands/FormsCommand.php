@@ -55,7 +55,7 @@ Class FormsCommand extends Command
 		$bundle = trim($bundle, '/');
 		$bundle = trim($bundle, '\\');
 
-        $path_schema = YS_APP . 'storage/schemas/';
+        $path_schema = YS_APP . 'src/storage/schemas/';
 
         if($version === null)
         {
@@ -129,7 +129,7 @@ Class FormsCommand extends Command
 			$GenerateClass->setNamespace( ucfirst( str_replace('/', '\\', $bundle) ) . '\Forms\Base' );
 			$GenerateClass->setValues( array(
 				'namespace_base_model' => ucfirst( $bundle ) . '\Models\\',
-				'model'		=> ucfirst( $bundle ) . '\Models\\' . ucfirst( $table )
+				'model'		=> ucfirst( $bundle ) . '\Models\\' . ucfirst( $table ).'Model'
 			) );
 
 			$GenerateClass->create( YS_BUNDLES . $bundle . '/Forms/Base/' . ucfirst( $table ) . 'FormBase', $options );

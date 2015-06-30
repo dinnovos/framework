@@ -173,7 +173,7 @@ class ControllerResolver implements ControllerResolverInterface
         else if(isset( $attributes['_route'] ) && preg_match('/^(\@default)/', $attributes['_route']))
         {
             $parts[0] = $attributes['_bundle'];
-            $parts[1] = str_replace(' ', '', ucwords(str_replace('-', ' ',$attributes['controller'])));
+            $parts[1] = str_replace(' ', '', ucwords(str_replace('-', ' ',str_replace(':', ' \\ ', $attributes['controller']))));
             $parts[2] = str_replace(' ', '', ucwords(str_replace('-', ' ',$attributes['action'])));
         }
         else

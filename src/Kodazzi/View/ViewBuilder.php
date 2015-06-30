@@ -50,8 +50,8 @@ Class ViewBuilder
         $enabled_path_themes = $user->get('app', 'enabled_path_themes');
 
 		$path_templates = array(
-			YS_APP.'layouts',
-			YS_APP.'templates'
+			YS_APP.'src/layouts',
+			YS_APP.'src/templates'
 		);
 
         if($enabled_path_themes)
@@ -86,7 +86,7 @@ Class ViewBuilder
 
 		// Funcion para construir las url
 		$build_url = new \Twig_SimpleFunction('build_url', function ( $name_route, $parameters = array() ) {
-			return \Service::get('kernel.url_generator')->generate( $name_route , $parameters );
+			return \Kodazzi\Tools\Util::buildUrl( $name_route , $parameters );
 		});
 
         // Funcion para construir las url
@@ -153,6 +153,13 @@ Class ViewBuilder
 		$this->Twig = $Twig;
 	}
 
+    public function addFunction($function, \Closure $closure)
+    {
+        $closure = new \Twig_SimpleFunction($function, $closure);
+
+        $this->Twig->addFunction($closure);
+    }
+
 	public function set( $keys, $value = null )
 	{
 		if (is_array($keys))
@@ -194,10 +201,26 @@ Class ViewBuilder
 		else
 		{
 			$parts = explode(':', $template );
+            $tpl = '';
 
             if( is_array( $parts ) && count( $parts ) == 3 )
 			{
-                $tpl = \Kodazzi\Tools\Inflector::underscore($parts[1]);
+                // Verifica si se busca un subdirectorio dentro de la vista
+                if(stripos($parts[1],'/'))
+                {
+                    $p = explode('/', $parts[1]);
+
+                    foreach($p as $_p)
+                    {
+                        $tpl .= \Kodazzi\Tools\Inflector::underscore($_p).'/';
+                    }
+
+                    $tpl = trim($tpl, '/');
+                }
+                else
+                {
+                    $tpl = \Kodazzi\Tools\Inflector::underscore($parts[1]);
+                }
 
                 $path = YS_BUNDLES.$parts[0].'/views/'.strtolower($tpl);
 

@@ -41,7 +41,7 @@ Class Foreign extends \Kodazzi\Form\Field
 		
 		if(count($options) == 0)
 		{
-			$options = \AppKernel::db( $this->name_model_relation )->fetchForOptions();
+			$options = \Service::get('db')->model( $this->name_model_relation )->fetchForOptions();
 		}
 
 		return \Kodazzi\Helper\FormHtml::select($format, $options, $this->value, null, array(

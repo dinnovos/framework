@@ -236,18 +236,26 @@ class Db
 			$data[$field] = $instance->$field;
 		}
 
-		/* Se verifica si el modelo el metodo getFieldsSluggable */
-		if($rF->hasMethod( 'getFieldsSluggable' ))
+		/* Se verifica si el modelo tiene el metodo getFieldsSluggable */
+		if($rF->hasMethod('getFieldsSluggable'))
 		{
-			$fields_slug = $instance->getFieldsSluggable();
-			$slug = '';
+            // Si en la data existe un campo slug se utiliza en lugar de crearlo
+            if(isset($data['slug']) && $data['slug'] != '')
+            {
+                $data['slug'] = \Kodazzi\Tools\String::slug($data['slug']);
+            }
+            else
+            {
+                $fields_slug = $instance->getFieldsSluggable();
+                $slug = '';
 
-			foreach($fields_slug as $field_slug)
-			{
-				$slug .= $instance->$field_slug.' ';
-			}
+                foreach($fields_slug as $field_slug)
+                {
+                    $slug .= $instance->$field_slug.' ';
+                }
 
-			$data['slug'] = \Kodazzi\Tools\String::slug( $slug );
+                $data['slug'] = \Kodazzi\Tools\String::slug($slug);
+            }
 		}
 
 		/* Verifica si el campo primary existe y contiene algun valor */
@@ -262,7 +270,7 @@ class Db
 				// Se verifica si el modelo tiene la constante hasTimestampable
 				if( $rF->hasConstant( 'hasTimestampable') && $instance::hasTimestampable )
 				{
-					$data['updated'] = date( "Y-m-d H:i:s", time() );
+					$data['updated'] = \Kodazzi\Tools\Date::getDate();
 				}
 
 				// Retorna la cantidad de filas afectadas.
@@ -283,8 +291,8 @@ class Db
 		// Se verifica si el modelo tiene la constante hasTimestampable
 		if( $rF->hasConstant( 'hasTimestampable') && $instance::hasTimestampable )
 		{
-			$data['created'] = date( "Y-m-d H:i:s", time() );
-			$data['updated'] = date( "Y-m-d H:i:s", time() );
+			$data['created'] = \Kodazzi\Tools\Date::getDate();
+			$data['updated'] = \Kodazzi\Tools\Date::getDate();
 		}
 
 		$result = $this->insert( $data );

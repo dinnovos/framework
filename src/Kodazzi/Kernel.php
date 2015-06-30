@@ -37,7 +37,7 @@ class Kernel extends HttpKernel
         // Carga la configuracion del proyecto
         Service::get('config')->loadConfigGlobal();
 
-        // Indica a la clase traductor los bundles registrados
+        // Carga la clase translator
         Service::get('translator')->loader(Service::get('config')->get('app', 'local'));
 
         $this->registerProviders();

@@ -455,6 +455,11 @@ abstract Class Field
 		return $this->template;
 	}
 
+    public function getPlaceholder()
+    {
+        return $this->placeholder;
+    }
+
 	/************************************************************************/
 
 	public function isHidden()
@@ -545,7 +550,7 @@ abstract Class Field
 
 		if ( $this->is_unique )
 		{
-			$db = \AppKernel::db( $this->form->getNameModel() );
+			$db = \Service::get('db')->model($this->form->getNameModel());
 
 			if( $this->form->isNew() )
 			{

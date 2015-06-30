@@ -2,7 +2,7 @@
 /**
  * This file is part of the Kodazzi Framework.
  *
- * (c) Jorge Gaitan <jorge@Kodazzi.com>
+ * (c) Jorge Gaitan <jgatan@kodazzi.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,12 +12,12 @@ use Kodazzi\Kernel;
 
 Class ##CLASS## ##EXTENDS##
 {
-    public static function registryBundles()
+    public function start()
     {
-        return array(
+        Service::registerBundles(array(
         <?php foreach($data['bundles'] as $namespace):?>
         '<?php echo $namespace; ?>\\',
         <?php endforeach; ?>
-        );
+        ));
     }
 }

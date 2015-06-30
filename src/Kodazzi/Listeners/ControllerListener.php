@@ -16,19 +16,14 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 class ControllerListener implements EventSubscriberInterface
 {
-    protected $container;
-
-    public function __construct($container)
-    {
-        $this->container = $container;
-    }
-
     public function onKernelController(FilterControllerEvent $event)
     {
         $controller = $event->getController();
 
-        // Agrega el contenedor de servicios al controlador
-        $controller[0]->setServiceContainer($this->container);
+        if(isset($controller[0]) && is_object($controller[0]))
+        {
+            $controller[0]->preAction();
+        }
     }
 
     public static function getSubscribedEvents()

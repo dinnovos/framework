@@ -146,9 +146,26 @@ Class Util
 		return false;
 	}
 
+    static public function buildUrl($route, $parameters = array())
+    {
+        if($route == '@default' || preg_match('/^(\@default)/', $route))
+        {
+            foreach($parameters as $key => $parameter)
+            {
+                $parameters[$key] = strtolower(preg_replace('/[^A-Z^a-z^0-9^\:]+/','-',
+                                               preg_replace('/([a-z\d])([A-Z])/','\1_\2',
+                                               preg_replace('/([A-Z]+)([A-Z][a-z])/','\1_\2',
+                                               str_replace(array('/', '\\'), ':', $parameter)))));
+            }
+        }
+
+        return \Service::get('kernel.url_generator')->generate( $route, $parameters);
+    }
+
     static function bundle($namespace, $action)
     {
-        $bundles = \AppKernel::registryBundles();
+        $bundles = \Service::getNamespacesBundles();
+
         $namespace_slug = \Kodazzi\Tools\String::slug($namespace);
         $bundles_activated = array();
         $action = strtolower($action);
@@ -177,7 +194,7 @@ Class Util
         }
 
         // Crea la clase AppKernel
-        $GenerateClass = \AppKernel::get('generate_class');
+        $GenerateClass = \Service::get('generate_class');
         $GenerateClass->setTemplate('AppKernel');
         $GenerateClass->setNameClass('AppKernel');
         $GenerateClass->setNameClassExtend('Kernel');

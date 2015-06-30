@@ -32,7 +32,7 @@ Class SessionBuilder extends Session
 
 	public function encript( $string )
 	{
-		$token = $this->config->get('project', 'token');
+		$token = $this->config->get('app', 'token');
 
 		$_hash = sha1( $string . $token . substr($string, 1, 3) );
 
@@ -63,7 +63,7 @@ Class SessionBuilder extends Session
 
 	private function _tokenSession()
 	{
-		$token = $this->config->get('project', 'token');
+		$token = $this->config->get('app', 'token');
 
 		return sha1( 'f42xG51gd'.$_SERVER['HTTP_USER_AGENT'].$token );
 	}

@@ -9,7 +9,7 @@
  */
 
 define( 'YS_SRC_ROOT', realpath(dirname(__FILE__) . '/../') . '/src/');
-define( 'YS_CACHE', YS_APP . 'cache/' );
+define( 'YS_CACHE', YS_APP . 'src/cache/' );
 define( 'YS_EXT_TEMPLATE', '.twig' );
 
 // Se utiliza el autoloader de Composer
@@ -52,6 +52,10 @@ Service::set('kernel.url_generator', function(){
 
 Service::set('listener.router', function(){
     return new Symfony\Component\HttpKernel\EventListener\RouterListener(Service::get('kernel.matcher'), null, null, Service::get('kernel.stack'));
+});
+
+Service::set('listener.controller', function(){
+    return new Kodazzi\Listeners\ControllerListener();
 });
 
 Service::set('listener.response', function(){
@@ -124,6 +128,7 @@ Service::set('shell', function(){
 // Suscribe los escuchas
 $dispatcher = Service::get('event');
 $dispatcher->addSubscriber(Service::get('listener.router'));
+$dispatcher->addSubscriber(Service::get('listener.controller'));
 $dispatcher->addSubscriber(Service::get('listener.response'));
 
 // Registra la bolsa temporal en la session

@@ -18,7 +18,7 @@ namespace Kodazzi\Form;
 
 use Symfony\Component\HttpFoundation\Request;
 
-Class Form extends InterfaceForm
+Class FormBuilder extends InterfaceForm
 {
 	private $has_data = false;
 
@@ -60,7 +60,7 @@ Class Form extends InterfaceForm
 		{
 			$template = $widget->getTemplate();
 
-			return \AppKernel::get('view')->render( $template, array('widget' => $widget) );
+			return \Service::get('view')->render( $template, array('widget' => $widget) );
 		}
 		
 		return '';
@@ -259,7 +259,7 @@ Class Form extends InterfaceForm
 				return false;
 			}
 
-			$db = \AppKernel::db();
+			$db = \Service::get('db');
 
 			// Si el objeto es nuevo lo crea
 			$instance = ( $this->isNew() ) ? new $this->name_model() : $this->model;

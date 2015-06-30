@@ -55,10 +55,10 @@ Class TranslatorBuilder
             }
         }
 
+        $path_i18n = str_replace('\\', '/', YS_APP.'src/i18n/'.$part_locale[0]);
+
         if(is_dir($path_i18n))
         {
-            $path_i18n = str_replace('\\', '/', YS_APP.'i18n/'.$part_locale[0]);
-
             $finder = new Finder();
             $finder->files()->name('*.i18n.php')->in($path_i18n);
 
