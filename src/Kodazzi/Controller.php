@@ -26,8 +26,8 @@ use Service;
 
 Class Controller
 {
-    protected function preAction(){}
-    protected function postAction(){}
+    public function preAction(){}
+    public function postAction(){}
 
     /**
      * @return Response
