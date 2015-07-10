@@ -45,9 +45,9 @@ Class ViewBuilder
         $this->Config = $config;
         $this->UrlGenerator = $url_generator;
 
-        $theme_web = $user->get('app', 'theme_web');
-        $theme_admin = $user->get('app', 'theme_admin');
-        $enabled_path_themes = $user->get('app', 'enabled_path_themes');
+        $theme_web = $config->get('app', 'theme_web');
+        $theme_admin = $config->get('app', 'theme_admin');
+        $enabled_path_themes = $config->get('app', 'enabled_path_themes');
 
 		$path_templates = array(
 			YS_APP.'src/layouts',
