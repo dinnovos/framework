@@ -22,6 +22,7 @@ use Kodazzi\Form\FormBuilder;
 use Kodazzi\Session\SessionBuilder;
 use Kodazzi\Translator\TranstalorBuilder;
 use Kodazzi\View\ViewBuilder;
+use Kodazzi\Security\Card\CardManager;
 use Service;
 
 Class Controller
@@ -112,6 +113,15 @@ Class Controller
     public function getRequest()
     {
         return Service::get('kernel.request');
+    }
+
+
+    /**
+     * @return CardManager
+     */
+    public function getUserCardManager()
+    {
+        return Service::get('user_card_manager');
     }
 
     public function getPOST()

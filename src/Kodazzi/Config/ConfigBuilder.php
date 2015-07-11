@@ -21,6 +21,7 @@ class ConfigBuilder implements ConfigBuilderInterface
 		$this->config['app'] = require YS_APP . 'config/app.cf.php';
 		$this->config['db'] = require YS_APP . 'config/db.cf.php';
 		$this->config['providers'] = require YS_APP . 'config/providers.cf.php';
+		$this->config['security'] = require YS_APP . 'config/security.cf.php';
 	}
 
 	public function get( $file, $key = null, $default = -1)

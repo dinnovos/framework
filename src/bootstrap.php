@@ -58,6 +58,10 @@ Service::set('listener.controller', function(){
     return new Kodazzi\Listeners\ControllerListener();
 });
 
+Service::set('listener.firewall', function(){
+    return new Kodazzi\Security\Firewall(Service::get('config'), Service::get('user_card_manager'));
+});
+
 Service::set('listener.response', function(){
     return new Symfony\Component\HttpKernel\EventListener\ResponseListener('UTF-8');
 });
@@ -76,6 +80,14 @@ Service::set('temporary_bag', function(){
 
 Service::set('session', function(){
     return new Kodazzi\Session\SessionBuilder(Service::get('config'));
+});
+
+Service::set('user_card_manager', function(){
+    return new Kodazzi\Security\Card\CardManager(Service::get('session'));
+});
+
+Service::factory('generic_user_card', function(){
+    return new Kodazzi\Security\Card\GenericUserCard();
 });
 
 Service::set('view', function(){
@@ -125,9 +137,13 @@ Service::set('shell', function(){
     return new Kodazzi\Console\Shell();
 });
 
+// Captura la peticion
+Service::instance('kernel.request', Symfony\Component\HttpFoundation\Request::createFromGlobals());
+
 // Suscribe los escuchas
 $dispatcher = Service::get('event');
 $dispatcher->addSubscriber(Service::get('listener.router'));
+$dispatcher->addSubscriber(Service::get('listener.firewall'));
 $dispatcher->addSubscriber(Service::get('listener.controller'));
 $dispatcher->addSubscriber(Service::get('listener.response'));
 
@@ -140,11 +156,8 @@ $session->start();
 
 include YS_APP.'AppKernel.php';
 
-// Captura la peticion
-$request = Symfony\Component\HttpFoundation\Request::createFromGlobals();
-
 // Agrega al contenedor la instancia de Request y loader.
-Service::instance('kernel.request', $request);
+
 Service::instance('kernel.loader', $loader);
 
 $AppKernel = new AppKernel();
@@ -153,4 +166,4 @@ Service::instance('kernel', $AppKernel);
 
 $response = Service::get('kernel')->handle(Service::get('kernel.request'));
 $response->send();
-Service::get('kernel')->terminate($request, $response);
+Service::get('kernel')->terminate(Service::get('kernel.request'), $response);
