@@ -46,6 +46,11 @@ class GenericUserCard implements CardInterface
         return $this->attributes;
     }
 
+    public function getAttribute($key)
+    {
+        return array_key_exists($key, $this->attributes) ? $this->attributes[$key]: null;
+    }
+
     public function hasAttribute($key)
     {
         return array_key_exists($key, $this->attributes) ? true: false;
