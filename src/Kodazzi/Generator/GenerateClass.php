@@ -55,7 +55,7 @@ Class GenerateClass
 		$this->name_class_extend = $class;
 	}
 
-	public function create($path_file_generate, $data = array())
+	public function create($path_file_generate, $data = array(), $ext = '.php')
 	{
 		$trans = array();
 		$options = $this->data;
@@ -79,7 +79,7 @@ Class GenerateClass
 
 		$content = str_replace(array('[?php', '[?=', '?]'), array('<?php', '<?php echo', '?>'), $content);
 
-		\Kodazzi\Tools\File::write($path_file_generate . '.php', $content);
+		\Kodazzi\Tools\File::write($path_file_generate . $ext, $content);
 	}
 
 }

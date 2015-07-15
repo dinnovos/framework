@@ -133,6 +133,10 @@ Service::factory('command.form', function(){
     return new Kodazzi\Console\Commands\FormsCommand();
 });
 
+Service::factory('command.bundle', function(){
+    return new Kodazzi\Console\Commands\BundleCommand();
+});
+
 Service::set('shell', function(){
     return new Kodazzi\Console\Shell();
 });

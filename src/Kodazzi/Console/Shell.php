@@ -32,6 +32,7 @@ Class Shell
 		$cli->add(Service::get('command.database'));
 		$cli->add(Service::get('command.model'));
 		$cli->add(Service::get('command.form'));
+		$cli->add(Service::get('command.bundle'));
 
 		$cli->run();
 	}

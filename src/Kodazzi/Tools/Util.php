@@ -164,6 +164,7 @@ Class Util
 
     static function bundle($namespace, $action)
     {
+        $namespace = str_replace('/', '\\', $namespace);
         $bundles = \Service::getNamespacesBundles();
 
         $namespace_slug = \Kodazzi\Tools\String::slug($namespace);
