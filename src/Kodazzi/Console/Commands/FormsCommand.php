@@ -118,7 +118,7 @@ Class FormsCommand extends Command
 				$GenerateClass->setNameClass(  ucfirst( $table ) . 'Form' );
 				$GenerateClass->setNamespace( ucfirst( str_replace('/', '\\', $bundle) ) . '\Forms' );
                 $GenerateClass->setNameClassExtend( 'Base\\'.ucfirst($table).'FormBase' );
-				$GenerateClass->create( YS_BUNDLES . $bundle . '/Forms/' . ucfirst( $table ) . 'Form', false, $options );
+				$GenerateClass->create( YS_BUNDLES . $bundle . '/Forms/' . ucfirst( $table ) . 'Form', $options );
 
 				$output->write( " - Clase Form '" . ucfirst( $table ) . "Form' fue creada correctamente." . PHP_EOL );
 			}
