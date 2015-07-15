@@ -1,4 +1,4 @@
-{% extend 'layout.web.twig' %}
+{% extends 'layout.web.twig' %}
 
 {% block content %}
     <h1>Bundle</h1>
