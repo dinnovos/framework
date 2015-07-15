@@ -22,6 +22,18 @@ $loader->set('Providers\\', array(YS_APP));
 $loader->set('Events\\', array(YS_APP));
 $loader->set('Listeners\\', array(YS_APP));
 
+use Symfony\Component\Debug\Debug;
+
+if ( YS_DEBUG )
+{
+    Debug::enable();
+}
+else
+{
+    ini_set( 'display_errors', 0 );
+}
+
+
 Kodazzi\Backing\Alias::set('Service', 'Kodazzi\Container\Service');
 Kodazzi\Backing\Alias::set('Db', 'Kodazzi\Facade\Db');
 Kodazzi\Backing\Alias::set('Event', 'Kodazzi\Facade\Event');
