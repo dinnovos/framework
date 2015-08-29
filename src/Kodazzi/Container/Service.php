@@ -39,9 +39,9 @@ Class Service
         self::$singleton[$alias] = $instance;
     }
 
-    public static function get($alias, $options = array())
+    public static function get($alias, $options = array(), $force_new = false)
     {
-        if (isset (self::$singleton[$alias]))
+        if (isset (self::$singleton[$alias]) && ! $force_new)
         {
             return self::$singleton[$alias];
         }

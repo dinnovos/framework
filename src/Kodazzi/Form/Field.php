@@ -164,7 +164,7 @@ abstract Class Field
 	/**
 	 * @return \Kodazzi\Form\Field
 	 */
-	public function renderLabel( $value = null )
+	public function renderLabel( $value = null, $attributes = '' )
 	{
 		$for = $this->name_form . '_' . $this->name;
 
@@ -173,7 +173,7 @@ abstract Class Field
 			$value = $this->getValueLabel();
 		}
 
-		return \Kodazzi\Helper\FormHtml::label( $for, $value );
+		return \Kodazzi\Helper\FormHtml::label( $for, $value, $attributes );
 	}
 
 

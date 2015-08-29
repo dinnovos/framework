@@ -166,7 +166,7 @@ Class FormBuilder extends InterfaceForm
 						continue;
 					}
 
-					$_error = strtr($this->I18n->get('required'), array('%name%' => $widget->getValueLabel()));
+					$_error = strtr($this->I18n->get('form.required'), array('%name%' => $widget->getValueLabel()));
 
 					$this->all_errors[$name_field] = $_error;
 
@@ -286,7 +286,7 @@ Class FormBuilder extends InterfaceForm
 			}
 			catch ( Exception $e )
 			{
-				$this->msg_global_error = $this->I18n->get('form_internal', 'Internal Error');
+				$this->msg_global_error = $this->I18n->get('form.form_internal', 'Internal Error');
 			}
 			
 			if( !$ok )

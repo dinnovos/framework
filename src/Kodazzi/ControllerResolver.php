@@ -50,7 +50,14 @@ class ControllerResolver implements ControllerResolverInterface
      */
     public function getController(Request $request)
     {
-        if (!$controller = $request->attributes->get('controller'))
+        $controller = $request->attributes->get('controller');
+
+        if($request->attributes->has('_sub_request') && $request->attributes->get('_sub_request'))
+        {
+            $controller = $request->attributes->get('_controller');
+        }
+
+        if (!$controller)
         {
             if (null !== $this->logger)
             {
@@ -178,7 +185,7 @@ class ControllerResolver implements ControllerResolverInterface
         }
         else
         {
-            $controller = $attributes['controller'];
+            $controller = (array_key_exists('controller', $attributes)) ? $attributes['controller'] : ((array_key_exists('_controller', $attributes)) ? $attributes['_controller']:'');
             $parts = explode( ':', str_replace('/', '\\', $controller) );
         }
 

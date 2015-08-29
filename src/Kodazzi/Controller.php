@@ -142,6 +142,19 @@ Class Controller
         return Service::get('mobile');
     }
 
+    /**
+     * @return PHPMailer
+     */
+    public function getPHPMailer()
+    {
+        return Service::get('php_mailer');
+    }
+
+    public function createToken($string = '')
+    {
+        return sha1( $string.$this->getConfig()->get('app', 'token') );
+    }
+
     public function getRender($template, $data = array())
     {
         return $this->getView()->render($template, $data);
@@ -199,11 +212,36 @@ Class Controller
         return "http://{$_SERVER['HTTP_HOST']}";
     }
 
+    /**
+     * @return Response
+     */
+    public function forward($controller, $post = array(), $get = array())
+    {
+        $request = Service::get('new.request');
+        $kernel = Service::get('kernel');
+
+        $request->attributes->set('_controller', $controller);
+        $request->attributes->set('_route', '_sub_request');
+        $request->attributes->set('_sub_request', true);
+
+        $this->getRequest()->request->add($post);
+        $this->getRequest()->query->add($get);
+
+        $response = $kernel->handle($request, \Symfony\Component\HttpKernel\HttpKernelInterface::SUB_REQUEST);
+
+        return $response;
+    }
+
     public function slug($string)
     {
         $string = \Kodazzi\Tools\String::slug($string);
 
         return $string;
+    }
+
+    public function clear($value, $encoding='UTF-8')
+    {
+        return htmlentities(strip_tags($value), ENT_QUOTES, $encoding);
     }
 
     public function getTimestamp($string = 'Y-m-d H:i:s')

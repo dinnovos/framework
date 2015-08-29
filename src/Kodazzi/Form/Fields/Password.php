@@ -27,7 +27,7 @@ Class Password extends \Kodazzi\Form\Field
 
 		if ( preg_match('/'.$default.'/', $this->value) )
 		{
-			$this->value = \AppKernel::get('user')->encript( $this->value );
+			$this->value = \Service::get('session')->encript( $this->value );
 
 			return true;
 		}

@@ -70,6 +70,10 @@ Service::set('listener.controller', function(){
     return new Kodazzi\Listeners\ControllerListener();
 });
 
+Service::set('listener.subrequest', function(){
+    return new Kodazzi\Listeners\SubRequestListener();
+});
+
 Service::set('listener.firewall', function(){
     return new Kodazzi\Security\Firewall(Service::get('config'), Service::get('user_card_manager'));
 });
@@ -114,6 +118,19 @@ Service::set('mobile', function(){
     return new Detection\MobileDetect();
 });
 
+Service::set('php_mailer', function(){
+    $path = YS_VND.'phpmailer/phpmailer/class.phpmailer.php';
+
+    if( is_file( $path ) )
+    {
+        require_once $path;
+
+        return new PHPMailer( YS_DEBUG );
+    }
+
+    return null;
+});
+
 Service::set('validate_schema', function(){
     return new Kodazzi\Generator\ValidateSchema();
 });
@@ -153,6 +170,10 @@ Service::set('shell', function(){
     return new Kodazzi\Console\Shell();
 });
 
+Service::factory('new.request', function(){
+    return new Symfony\Component\HttpFoundation\Request();
+});
+
 // Captura la peticion
 Service::instance('kernel.request', Symfony\Component\HttpFoundation\Request::createFromGlobals());
 
@@ -162,6 +183,7 @@ $dispatcher->addSubscriber(Service::get('listener.router'));
 $dispatcher->addSubscriber(Service::get('listener.firewall'));
 $dispatcher->addSubscriber(Service::get('listener.controller'));
 $dispatcher->addSubscriber(Service::get('listener.response'));
+$dispatcher->addSubscriber(Service::get('listener.subrequest'));
 
 // Registra la bolsa temporal en la session
 $session = Service::get('session');
