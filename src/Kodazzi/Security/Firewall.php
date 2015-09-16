@@ -52,7 +52,7 @@ class Firewall implements EventSubscriberInterface
             {
                 // Busca en la session si existe una tarjeta del usuario
                 // La tajeta debe ser un objecto de serializado que implemente la interfaz CardInterface
-                $user_card = $this->CardManager->get('user_card');
+                $user_card = $this->CardManager->getCard('user_card');
 
                 // Si la tarjeta existe
                 if($user_card)

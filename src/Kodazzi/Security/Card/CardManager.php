@@ -23,7 +23,7 @@ class CardManager
         $this->Session = $session;
     }
 
-    public function get()
+    public function getCard()
     {
         if($this->Session->has('user_card'))
         {
