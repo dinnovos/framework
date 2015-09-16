@@ -26,20 +26,52 @@ Class FormBuilder extends InterfaceForm
 	{
 		$string_fields = '';
 		$string_fields_hidden = '';
+        $group = '';
 
 		$widgets = $this->widgets;
 
-		foreach ($widgets as $widget)
+		foreach ($widgets as $field => $widget)
 		{
-			// Crea los campos ocultos
-			if ( $widget->isHidden() )
-			{
-				$string_fields_hidden .= $this->renderRow( $widget );
+            if(is_object($widget))
+            {
+                // Crea los campos ocultos
+                if ( $widget->isHidden() )
+                {
+                    $string_fields_hidden .= $this->renderRow( $widget );
 
-				continue;
-			}
-			
-			$string_fields .= $this->renderRow( $widget );
+                    continue;
+                }
+
+                $string_fields .= $this->renderRow( $widget );
+            }
+            else if($this->is_translatable && is_array($widget) && $field == 'translation')
+            {
+                // Recorre todos los lenguages de la db
+                foreach($widget as $lang => $translation)
+                {
+                    $group = '';
+                    $widgetsTranslation = $translation['form']->getWidgets();
+
+                    // Recorre todos los campos
+                    foreach($widgetsTranslation as $widgetTranslation)
+                    {
+                        // Crea los campos ocultos
+                        if ( $widgetTranslation->isHidden() )
+                        {
+                            $group .= $this->renderRow($widgetTranslation);
+
+                            continue;
+                        }
+
+                        $group .= $this->renderRow($widgetTranslation);
+                    }
+
+                    $string_fields .= \Service::get('view')->render('form/default_group', array(
+                        'form_group_title'      => $translation['title'],
+                        'form_group_content'    => $group,
+                    ));
+                }
+            }
 		}
 
 		return $string_fields . $string_fields_hidden;
@@ -47,21 +79,25 @@ Class FormBuilder extends InterfaceForm
 
 	public function renderRow( \Kodazzi\Form\Field $widget )
 	{
-		// Crea los campos ocultos
-		if ( $widget->isHidden() )
-		{
-			return \Kodazzi\Helper\FormHtml::hidden($this->name_form . '[' . $widget->getName() . ']', $widget->getValue(), $widget->getMaxlength(), array(
-				'id' => $this->name_form . '_' . $widget->getName(),
-				'class' => $widget->getClassCss()
-					)
-			);
-		}
-		else if( $widget->isDisplay() )
-		{
-			$template = $widget->getTemplate();
+        if($widget->isDisplay())
+        {
+            if ( $widget->isHidden() )
+            {
+                $format = ($widget->getFormat()) ? $widget->getFormat() : $this->name_form . '[' . $widget->getName() . ']';
 
-			return \Service::get('view')->render( $template, array('widget' => $widget) );
-		}
+                return \Kodazzi\Helper\FormHtml::hidden($format, $widget->getValue(), $widget->getMaxlength(), array(
+                        'id' => $this->name_form . '_' . $widget->getName(),
+                        'class' => $widget->getClassCss()
+                    )
+                );
+            }
+            else
+            {
+                $template = $widget->getTemplate();
+
+                return \Service::get('view')->render( $template, array('widget' => $widget) );
+            }
+        }
 		
 		return '';
 	}
@@ -93,30 +129,25 @@ Class FormBuilder extends InterfaceForm
 
 		$this->data = array_merge($array_post, $array_files);
 
+        if($this->is_translatable)
+        {
+            $nameFormTranslatable = $this->getTranslationForm()->getNameForm();
+
+            if(array_key_exists($nameFormTranslatable, $post))
+            {
+                $this->data[$nameFormTranslatable] = $post[$nameFormTranslatable];
+            }
+        }
+
         return $this->has_data;
 	}
 
 	public function bindRequest( Request $request )
 	{
-		$name_form = $this->name_form;
-		$array_post = array();
-		$array_files = array();
-
 		$post = $request->request->all();
 		$files = $request->files->all();
 
-		if(array_key_exists($name_form, $post))
-		{
-			$array_post = $post[$name_form];
-			$this->has_data = true;
-		}
-
-		if(array_key_exists($name_form, $files))
-		{
-			$array_files = $files[$name_form];
-		}
-
-		$this->data = array_merge($array_post, $array_files);
+        $this->bind($post, $files);
 
         return $this->has_data;
 	}
@@ -151,84 +182,113 @@ Class FormBuilder extends InterfaceForm
 		}
 
 		// Valida cada campo enviado
-		foreach ( $widgets as $name_field => $widget )
+		foreach ($widgets as $name_field => $widget)
 		{
-			$type = strtoupper( basename( str_replace('\\', '/', get_class($widget)) ) );
+            if(is_object($widget))
+            {
+                $this->validateField($widget, $data);
+            }
+            else if(is_array($widget) && $this->is_translatable)
+            {
+                foreach($widget as $lang => $translation)
+                {
+                    $nameFormTranslatable = $translation['form']->getNameForm();
 
-			if ( $widget->isRequired() )
-			{
-				// Si no existe el campo o esta vacio
-				if ( !isset($data[$name_field]) || (isset( $data[$name_field] ) && $data[$name_field] === '') )
-				{
-					// Si se esta editando y el campo es password, file o imagen se ignora ya que estos campos pueden estar vacios
-					if ( !$this->isNew() && in_array($type, array('PASSWORD', 'FILE', 'IMAGE') ) )
-					{
-						continue;
-					}
+                    if(array_key_exists($nameFormTranslatable, $data) && array_key_exists($lang, $data[$nameFormTranslatable]) && is_array($data[$nameFormTranslatable][$lang]))
+                    {
+                        $dataFormTranslation[$nameFormTranslatable] = array_merge(array('translatable_id' => 1, 'language_id' => 1, 'csrf_token' => $translation['form']->getCsrfToken()), $data[$nameFormTranslatable][$lang]);
 
-					$_error = strtr($this->I18n->get('form.required'), array('%name%' => $widget->getValueLabel()));
+                        $translation['form']->bind($dataFormTranslation);
 
-					$this->all_errors[$name_field] = $_error;
-
-					$widget->setError( $_error );
-					$widget->setValid( false );
-					$this->is_valid = false;
-					continue;
-				}
-			}
-
-			// Si existe el campo
-			if ( isset( $data[$name_field] ) )
-			{
-				// Si el campo no es requerido
-				// Si el campo es un archivo o imagen
-				// Si el campo esta vacio.
-				// No se debe validar.
-				if( in_array( $type, array('FILE', 'IMAGE') ) && ( $data[$name_field] == '' || $data[$name_field] == null ) )
-				{
-					continue;
-				}
-				else if( $data[$name_field] === '' ||  $data[$name_field] === null)
-				{
-					$cleaned_values[$name_field] = '';
-				}
-				else
-				{
-					if ( !$widget->validate( $data[$name_field]) )
-					{
-						/* Indica el objeto que tiene un error */
-						$widget->setValid( false );
-						$this->is_valid = false;
-
-						$this->all_errors[$name_field] = $widget->getError();
-					}
-					else
-					{
-						// Si hay archivos para subir guarda el widget en un array
-						if ( $widget->hasUpload() )
-						{
-							$this->files_uploads[$name_field] = $widget;
-
-							// Se almacena el nuevo nombre que tendra el archivo.
-							// No se utiliza getValue porque en los campos tipo FILE e IMAGE el value es una instancia de UploadedFile, componente de Symfony.
-							$cleaned_values[$name_field] = $widget->getNewName();
-						}
-						else
-						{
-							$cleaned_values[$name_field] = $widget->getValue();
-						}
-					}
-				}
-			}
+                        if(!$translation['form']->isValid())
+                        {
+                            $this->is_valid = false;
+                        }
+                    }
+                }
+            }
 		}
 
-		if ( $this->is_valid )
+		if ($this->is_valid)
 		{
-			$this->data = $cleaned_values;
+			$this->data = $this->clean_data;
 		}
 
 		return $this->is_valid;
 	}
+
+    public function validateField(\Kodazzi\Form\Field $widget, $data)
+    {
+        $name_field = $widget->getName();
+
+        $type = strtoupper(basename(str_replace('\\', '/', get_class($widget))));
+
+        if ($widget->isRequired())
+        {
+            // Si no existe el campo o esta vacio
+            if ( !array_key_exists($name_field, $data) || (array_key_exists($name_field, $data) && $data[$name_field] === '') )
+            {
+                // Si se esta editando y el campo es password, file o imagen se ignora ya que estos campos pueden estar vacios
+                if ( !$this->isNew() && in_array($type, array('PASSWORD', 'FILE', 'IMAGE') ) )
+                {
+                    return;
+                }
+
+                $_error = strtr($this->I18n->get('form.required'), array('%name%' => $widget->getValueLabel()));
+
+                $this->all_errors[$name_field] = $_error;
+
+                $widget->setError( $_error );
+                $widget->setValid( false );
+                $this->is_valid = false;
+
+                return;
+            }
+        }
+
+        if (array_key_exists($name_field, $data))
+        {
+            // Si el campo no es requerido
+            // Si el campo es un archivo o imagen
+            // Si el campo esta vacio.
+            // No se debe validar.
+            if(in_array( $type, array('FILE', 'IMAGE') ) && ( $data[$name_field] == '' || $data[$name_field] == null))
+            {
+                return;
+            }
+            else if($data[$name_field] === '' ||  $data[$name_field] === null)
+            {
+                $this->clean_data[$name_field] = '';
+            }
+            else
+            {
+                if (!$widget->validate($data[$name_field]))
+                {
+                    /* Indica el objeto que tiene un error */
+                    $widget->setValid( false );
+                    $this->is_valid = false;
+
+                    $this->all_errors[$name_field] = $widget->getError();
+                }
+                else
+                {
+                    // Si hay archivos para subir guarda el widget en un array
+                    if ( $widget->hasUpload() )
+                    {
+                        $this->files_uploads[$name_field] = $widget;
+
+                        // Se almacena el nuevo nombre que tendra el archivo.
+                        // No se utiliza getValue porque en los campos tipo FILE e IMAGE el value es una instancia de UploadedFile, componente de Symfony.
+                        $this->clean_data[$name_field] = $widget->getNewName();
+                    }
+                    else
+                    {
+                        $this->clean_data[$name_field] = $widget->getValue();
+                    }
+                }
+            }
+        }
+    }
 
 	public function save()
 	{
@@ -238,7 +298,7 @@ Class FormBuilder extends InterfaceForm
 		if ( $this->is_valid )
 		{
 			$widgets = $this->getWidgets();
-			
+
 			// Elimina el campo de verificacion csfr del formulario
 			unset( $data['csrf_token'] );
 			
@@ -264,25 +324,28 @@ Class FormBuilder extends InterfaceForm
 			// Si el objeto es nuevo lo crea
 			$instance = ( $this->isNew() ) ? new $this->name_model() : $this->model;
 
-			foreach ( $widgets as $field => $widget )
+			foreach ($widgets as $field => $widget)
             {
-                if ( $widget->hasMany() )
+                if(is_object($widget))
                 {
-                    $widget_many[] = $widget;
-                }
-                else
-                {
-                    if ( array_key_exists( $field, $data ) )
+                    if ($widget->hasMany())
                     {
-						// Si el campo debe ir vacio se asigna null para que no tenga problemas al ejecutar el query
-						$instance->$field = ($data[$field] == '') ? null : $data[$field];
+                        $widget_many[] = $widget;
+                    }
+                    else
+                    {
+                        if (array_key_exists($field, $data))
+                        {
+                            // Si el campo debe ir vacio se asigna null para que no tenga problemas al ejecutar el query
+                            $instance->$field = ($data[$field] == '') ? null : $data[$field];
+                        }
                     }
                 }
             }
 
 			try
 			{
-				$ok = $db->save( $instance );
+				$ok = $db->save($instance);
 			}
 			catch ( Exception $e )
 			{
@@ -293,12 +356,32 @@ Class FormBuilder extends InterfaceForm
 				return false;
 
 			$this->identifier = $db->getIdentifier();
+            $this->instance = $instance;
 
 			if ( count( $widget_many ) )
             {
                 foreach ( $widget_many as $_widget )
                 {
                    $_widget->saveRelation( $this->identifier );
+                }
+            }
+
+            if(array_key_exists('translation', $widgets) && is_array($widgets['translation']) && $this->is_translatable)
+            {
+                $namespaceInstace = $this->getNameModel();
+                $instaceModel = new $namespaceInstace();
+
+                // Obtiene todos los registros de lenguage de la bd
+                $languages = \Service::get('db')->model($instaceModel::modelLanguage)->fetchForOptions(array(), "a.code, a.id");
+
+                foreach($widgets['translation'] as $lang => $translation)
+                {
+                    if(array_key_exists($lang, $languages))
+                    {
+                        $translation['form']->setData('language_id', $languages[$lang]);
+                        $translation['form']->setData('translatable_id', $this->identifier);
+                        $translation['form']->save();
+                    }
                 }
             }
 

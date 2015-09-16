@@ -58,6 +58,7 @@ abstract Class Field
 	protected $field_value  = null;
 	protected $field_option  = null;
 	protected $other_attributes  = null;
+	protected $format  = null;
 
 	abstract public function valid();
 
@@ -393,6 +394,11 @@ abstract Class Field
 		return $this;
 	}
 
+    public function setFormat($format)
+    {
+        $this->format = $format;
+    }
+
 	/*************************************************************************************************/
 
 	public function getValueLabel()
@@ -458,6 +464,11 @@ abstract Class Field
     public function getPlaceholder()
     {
         return $this->placeholder;
+    }
+
+    public function getFormat()
+    {
+        return $this->format;
     }
 
 	/************************************************************************/

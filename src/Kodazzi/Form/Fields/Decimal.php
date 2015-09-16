@@ -49,10 +49,9 @@ Class Decimal extends  \Kodazzi\Form\Field
 	{
 		if(!$this->is_display)
 			return '';
-		
-		$format = $this->name_form . '[' . $this->name . ']';
-		$id = $this->name_form . '_' . $this->name;
 
+        $format = ($this->format) ? $this->format : $this->name_form . '[' . $this->name . ']';
+        $id = $this->name_form . '_' . $this->name;
 
         $value = ($this->value) ? number_format( str_replace(',', '.', $this->value), $this->scale, '.', '') : '';
 

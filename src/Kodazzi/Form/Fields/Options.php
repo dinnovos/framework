@@ -31,9 +31,9 @@ Class Options extends \Kodazzi\Form\Field
 	{
 		if(!$this->is_display)
 			return '';
-		
-		$format = $this->name_form . '[' . $this->name . ']';
-		$id = $this->name_form . '_' . $this->name;
+
+        $format = ($this->format) ? $this->format : $this->name_form . '[' . $this->name . ']';
+        $id = $this->name_form . '_' . $this->name;
 
 		if ($this->type_field_tag === 'radio')
 		{

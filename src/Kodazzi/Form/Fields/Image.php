@@ -89,9 +89,9 @@ Class Image extends \Kodazzi\Form\Fields\File
 	{
 		if(!$this->is_display)
 			return '';
-		
-		$format = $this->name_form . '[' . $this->name . ']';
-		$id = $this->name_form . '_' . $this->name;
+
+        $format = ($this->format) ? $this->format : $this->name_form . '[' . $this->name . ']';
+        $id = $this->name_form . '_' . $this->name;
 
 		return \Kodazzi\Helper\FormHtml::file($format, null, array(
 					'id' => $id,

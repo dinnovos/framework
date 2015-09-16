@@ -29,12 +29,15 @@ Class InterfaceForm implements \ArrayAccess
 	protected $msg_global_error = null;
 	protected $is_valid = true;
 	protected $is_multipart = false;
+	protected $is_translatable = false;
 	protected $data = array();
+	protected $clean_data = array();
 	protected $validators = array();
 	protected $Kernel;
 	protected $I18n;
 	protected $files_uploads = array();
 	protected $identifier = null;
+	protected $instance = null;
 	protected $config_fields = array();
 	protected $path_upload = null;
 	protected $all_errors = array();
@@ -166,6 +169,11 @@ Class InterfaceForm implements \ArrayAccess
 		throw new \Exception( "El campo '$field' no es v&aacute;lido." );
 	}
 
+    public function setData($key, $value)
+    {
+        $this->data[$key] = $value;
+    }
+
 	/************************************************************************/
 
 	/**
@@ -218,6 +226,11 @@ Class InterfaceForm implements \ArrayAccess
 	{
 		return $this->identifier;
 	}
+
+    public function getInstance()
+    {
+        return $this->instance;
+    }
 	
 	public function getData()
 	{
@@ -240,4 +253,38 @@ Class InterfaceForm implements \ArrayAccess
 	{
 		return ($this->is_multipart) ? true : false;
 	}
+
+    public function mergeTranslation()
+    {
+        $namespaceInstace = $this->getNameModel();
+        $instaceModel = new $namespaceInstace();
+        $Widgets = $this->getWidgets();
+
+        // Obtiene todos los registros de lenguage de la bd
+        $languages = \Service::get('db')->model($instaceModel::modelLanguage)->fetchAll();
+
+        foreach($languages as $lang)
+        {
+            $instanceTranslation = $this->getTranslationForm();
+            $WidgetsTranslation = $instanceTranslation->getWidgets();
+
+            foreach($WidgetsTranslation as $field => $Widget)
+            {
+                // Oculta los campos translatable_id, language_id y csrf_token del formulario translation
+                if(in_array($field, array('translatable_id', 'language_id')) || $Widget->getName() == 'csrf_token')
+                {
+                    $Widget->setDisplay(false);
+                }
+
+                // Cambia el formato del campo para incorporar la clave del lenguage.
+                $Widget->setFormat($instanceTranslation->getNameForm().'['.$lang->code.']['.$Widget->getName().']');
+            }
+
+            $Widgets['translation'][$lang->code]['title'] = $lang->name;
+            $Widgets['translation'][$lang->code]['form'] = $instanceTranslation;
+        }
+
+        $this->is_translatable = true;
+        $this->widgets = $Widgets;
+    }
 }

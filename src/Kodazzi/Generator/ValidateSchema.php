@@ -28,6 +28,9 @@ Class ValidateSchema
 	public function isValid( $schema = array() )
 	{
 		$this->schema = $schema;
+        $is_translatable = false;
+        $fields_translation = array();
+        $sluggable_translation = null;
 
 		if (!$this->is_valid)
 		{
@@ -56,6 +59,12 @@ Class ValidateSchema
 				continue;
 			}
 
+            // Verifica si el modelo es translatable:true
+            if(array_key_exists('translatable', $values['options']) && $values['options'] != '')
+            {
+                $is_translatable = true;
+            }
+
 			foreach ($values['fields'] as $field => $options)
 			{
 				/* Type */
@@ -75,7 +84,65 @@ Class ValidateSchema
 						$this->validateDefinition($table, $field, $options);
 					}
 				}
+
+                if(array_key_exists('translation', $options) && $options['translation'] == true)
+                {
+                    $fields_translation[$field] = $options;
+                    unset($this->schema[$table]['fields'][$field]);
+
+                    if(array_key_exists('sluggable', $values['options']))
+                    {
+                        $sluggable_translation = $values['options']['sluggable'];
+
+                        unset($this->schema[$table]['options']['sluggable']);
+                    }
+                }
 			}
+
+            // Agrega al esquema la estructura del modelo para la tabla translation
+            if($is_translatable && count($fields_translation))
+            {
+                $f = array();
+
+                $this->schema[$table.'Translation'] = array('options'=> array(
+                    'table'=> "{$values['options']['table']}_translation"),
+                    'fields' => array()
+                );
+
+                if($sluggable_translation)
+                {
+                    $this->schema[$table.'Translation']['options']['sluggable'] = $sluggable_translation;
+                }
+
+                // Agrega el campo primary
+                $this->schema[$table.'Translation']['fields']['id'] = array('type' => 'primary', 'strategy' => 'identity');
+
+                // Agrega los campos translation=true
+                foreach($fields_translation as $a => $b)
+                {
+                    $this->schema[$table.'Translation']['fields'][$a] = $b;
+                }
+
+                // Agrega la relacion con la tabla padre
+                $this->schema[$table.'Translation']['fields']['translatable'] = array(
+                    'type'      => 'foreign',
+                    'model'     => $table,
+                    'join'      => array('name'=>'translatable_id', 'foreignField' => 'id'),
+                    'relation'  => 'many-to-one'
+                );
+
+                // Agrega la relacion con la tabla Language
+                $this->schema[$table.'Translation']['fields']['language'] = array(
+                    'type'      => 'foreign',
+                    'model'     => $values['options']['translatable'],
+                    'join'      => array('name'=>'language_id', 'foreignField' => 'id'),
+                    'relation'  => 'many-to-one'
+                );
+            }
+
+            $is_translatable = false;
+            $fields_translation = array();
+            $sluggable_translation = null;
 		}
 
 		return $this->is_valid;
@@ -257,28 +324,35 @@ Class ValidateSchema
 			$this->errors[] = '- Table ' . ucfirst($table) . ': La opcion "timestampable" debe contener un valor boolean.';
 		}
 
+        /* translatable */
+        if (isset($options['translatable']))
+        {
+            if(!array_key_exists($options['translatable'], $this->schema))
+            {
+                $this->is_valid = false;
+                $this->errors[] = '- Table ' . ucfirst($table) . ': La opcion "translatable" debe contener un modelo valido del esquema.';
+            }
+        }
+
 		/* sluggable */
 		if (isset($options['sluggable']))
 		{
-			if (!is_array($options['sluggable']) || count($options['sluggable']) == 0)
+			if (!is_string($options['sluggable']))
 			{
 				$this->is_valid = false;
-				$this->errors[] = '- Table ' . ucfirst($table) . ': La opcion "sluggable" debe ser un array con los campos de la tabla actual.';
+				$this->errors[] = '- Table ' . ucfirst($table) . ': La opcion "sluggable" debe ser una cadena con el nombre de algun campo de la tabla actual.';
 
 				return;
 			}
 			else
 			{
 				$schema_current_table = $this->schema[$table];
-				
-				foreach($options['sluggable'] as $field_slug)
-				{
-					if (!isset($schema_current_table['fields'][$field_slug]))
-					{
-						$this->is_valid = false;
-						$this->errors[] = '- Table ' . ucfirst($table) . ': La opcion "sluggable" debe contener campos existentes en la tabla.';
-					}
-				}
+
+                if (!array_key_exists($options['sluggable'], $schema_current_table['fields']))
+                {
+                    $this->is_valid = false;
+                    $this->errors[] = '- Table ' . ucfirst($table) . ': La opcion "sluggable" debe contener un campo existente en la tabla.';
+                }
 			}
 		}
 	}
@@ -477,6 +551,17 @@ Class ValidateSchema
 		$value_parameter = $options['value-parameter'];
 		$pattern = $options['pattern'];
 
+        if($name_parameter == 'translation' && $value_parameter == true)
+        {
+            if(!array_key_exists($table, $this->schema) || (array_key_exists($table, $this->schema) && !array_key_exists('translatable', $this->schema[$table]['options'])))
+            {
+                $this->is_valid = false;
+                $this->errors[] = '- Table ' . ucfirst($table) . ': En el campo "' . $field . '", para utilizar "' . $name_parameter . ':true" debe existir el comportamiento "translatable" en el modelo.';
+            }
+
+            return;
+        }
+
 		switch ($type_value)
 		{
 			case "array":
@@ -510,6 +595,7 @@ Class ValidateSchema
 					$this->errors[] = '- Table ' . ucfirst($table) . ': En el campo "' . $field . '", el parametro "' . $name_parameter . '" debe contener un valor tipo "' . $type_value . '".';
 				}
 				break;
+
 			case "any":
 				// No tiene restricción
 				break;

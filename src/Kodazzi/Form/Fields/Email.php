@@ -36,9 +36,9 @@ Class Email extends \Kodazzi\Form\Field
 	{
 		if(!$this->is_display)
 			return '';
-		
-		$format = $this->name_form . '[' . $this->name . ']';
-		$id = $this->name_form . '_' . $this->name;
+
+        $format = ($this->format) ? $this->format : $this->name_form . '[' . $this->name . ']';
+        $id = $this->name_form . '_' . $this->name;
 
 		return \Kodazzi\Helper\FormHtml::input($format, $this->value, $this->max_length, array(
 					'id' => $id,

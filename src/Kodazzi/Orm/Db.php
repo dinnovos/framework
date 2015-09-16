@@ -23,15 +23,16 @@ class Db
 	protected $join_object = array();
 
 	protected $namespace = null;
+	protected $join_namespaces = array();
 	protected $instance_model = null;
 	protected $table = null;
 	protected $primary = null;
 	protected $title = null;
 	protected $identifier = null;
+	protected $has_definition_relation = false;
+    protected $QueryBuilder = null;
 
 	private $conn = null;
-
-	private $_query = null;
 
     protected $Config = null;
 
@@ -80,15 +81,71 @@ class Db
         if($namespace)
         {
             $this->namespace = $namespace;
-            $instance = new $namespace();
 
-            $this->_setPropertiesInstance( $instance );
+            $this->_setPropertiesInstance( new $namespace() );
         }
 
         return $this;
     }
 
-	/**
+    public function join($namespace, $alias, $fromAlias = 'a')
+    {
+        $this->join_namespaces[$namespace] = array_merge(array('type' => 'join'), $this->_join($namespace, $alias, $fromAlias));
+
+        return $this;
+    }
+
+    public function innerJoin($namespace, $alias, $fromAlias = 'a')
+    {
+        $this->join_namespaces[$namespace] = array_merge(array('type' => 'inner_join'), $this->_join($namespace, $alias, $fromAlias));
+
+        return $this;
+    }
+
+    public function leftJoin($namespace, $alias, $fromAlias = 'a')
+    {
+        $this->join_namespaces[$namespace] = array_merge(array('type' => 'left_join'), $this->_join($namespace, $alias, $fromAlias));
+
+        return $this;
+    }
+
+    public function rightJoin($namespace, $alias, $fromAlias = 'a')
+    {
+        $this->join_namespaces[$namespace] = array_merge(array('type' => 'right_join'), $this->_join($namespace, $alias, $fromAlias));
+
+        return $this;
+    }
+
+    public function getTranslation($lang)
+    {
+        $model = $this->instance_model;
+        $QueryBuilder = $this->getQueryBuilder();
+
+        $ReflectionObject = new \ReflectionObject($model);
+
+        $modelTranslation = ($ReflectionObject->hasConstant('modelTranslation')) ? $model::modelTranslation : null;
+        $modelLanguage = ($ReflectionObject->hasConstant('modelLanguage')) ? $model::modelLanguage : null;
+
+        $instanceModelTranslation = new $modelTranslation();
+        $instanceModelLanguage = new $modelLanguage();
+
+        if($modelTranslation)
+        {
+            $QueryBuilder->join('a', $instanceModelTranslation::table, 'tl', "a.".$model::primary."=tl.translatable_id");
+        }
+
+        if($modelLanguage)
+        {
+            $QueryBuilder->join('tl', $instanceModelLanguage::table, 'lg', "lg.".$instanceModelLanguage::primary."=tl.language_id");
+        }
+
+        $QueryBuilder->where("lg.code=:code");
+        $QueryBuilder->setParameter(":code", $lang);
+
+        return $this;
+    }
+
+    /**
 	 * @return \Doctrine\DBAL\Connection
 	 */
 	public function getDriverManager()
@@ -101,7 +158,7 @@ class Db
 	 */
 	public function getQueryBuilder()
 	{
-		return $this->conn->createQueryBuilder();
+		return ($this->QueryBuilder) ? $this->QueryBuilder : $this->QueryBuilder = $this->conn->createQueryBuilder();
 	}
 
 	public function getIdentifier()
@@ -124,7 +181,7 @@ class Db
 		return $this->conn->update( $this->table, $data, $where );
 	}
 
-	public function fetch( $where = array(), $fields = '*', $typeFetch = \PDO::FETCH_CLASS, $order = null )
+	public function fetch( array $where = array(), $fields = '*', $typeFetch = \PDO::FETCH_CLASS, $order = null )
 	{
 		$queryBuilder = $this->_buildQuery( $where, $fields, $order );
 
@@ -138,9 +195,9 @@ class Db
 		return $queryBuilder->execute()->fetchObject( $this->namespace );
 	}
 
-	public function fetchAll( $where = array(), $fields = '*', $typeFetch = \PDO::FETCH_CLASS, $order = null )
+	public function fetchAll( array $where = array(), $fields = '*', $typeFetch = \PDO::FETCH_CLASS, $order = null )
 	{
-		$queryBuilder = $this->_buildQuery(  $where, $fields, $order );
+		$queryBuilder = $this->_buildQuery( $where, $fields, $order );
 
 		if( $typeFetch == \PDO::FETCH_ASSOC )
 		{
@@ -153,7 +210,7 @@ class Db
 	public function fetchForOptions( $where = array(), $fields = null)
 	{
 		$data = array();
-		$fields = ( $fields === null ) ? "t.{$this->primary}, t.{$this->title}" : $fields;
+		$fields = ( $fields === null ) ? "a.{$this->primary}, a.{$this->title}" : $fields;
 
 		$queryBuilder = $this->_buildQuery(  $where, $fields );
 
@@ -302,42 +359,115 @@ class Db
 
 	/**************************************************************************************************************/
 
-	private function _buildQuery( $where = array(), $fields = '*', $order = null)
+	private function _buildQuery($where = array(), $fields = '*', $order = array())
 	{
 		$queryBuilder = $this->getQueryBuilder();
-		$queryBuilder->select( $fields );
-		$queryBuilder->from( $this->table, 't' );
+		$queryBuilder->select($fields);
+		$queryBuilder->from($this->table, 'a');
+        $join_namespaces = $this->join_namespaces;
 
-		foreach( $where as $field => $value )
+        // Verifica los joins
+        if(is_array($join_namespaces) && count($join_namespaces))
+        {
+            foreach($join_namespaces as $join_namespace => $join_options)
+            {
+                if($join_options['type'] == 'inner_join')
+                {
+                    $queryBuilder->innerJoin($join_options['fromAlias'], $join_options['table'], $join_options['alias'], "{$join_options['condition']}");
+                }
+                else if($join_options['type'] == 'left_join')
+                {
+                    $queryBuilder->leftJoin($join_options['fromAlias'], $join_options['table'], $join_options['alias'], "{$join_options['condition']}");
+                }
+                else if($join_options['type'] == 'right_join')
+                {
+                    $queryBuilder->rightJoin($join_options['fromAlias'], $join_options['table'], $join_options['alias'], "{$join_options['condition']}");
+                }
+                else
+                {
+                    $queryBuilder->join($join_options['fromAlias'], $join_options['table'], $join_options['alias'], "{$join_options['condition']}");
+                }
+            }
+        }
+
+		foreach($where as $field => $value)
 		{
-			if( $value === null )
+			if($value === null)
 			{
-				$queryBuilder->andWhere("t.{$field} IS NULL");
+				$queryBuilder->andWhere("a.{$field} IS NULL");
 			}
 			else
 			{
-				$queryBuilder->andWhere("t.{$field}=:$field");
+				$queryBuilder->andWhere("a.{$field}=:$field");
 				$queryBuilder->setParameter(":$field", $value);
 			}
 		}
 
-		if( $order )
+		if($order)
 		{
-			$_f = key( $order );
-			$_v = current( $order );
-			$queryBuilder->orderBy("t.$_f", $_v);
+			$_f = key($order);
+			$_v = current($order);
+			$queryBuilder->orderBy("a.$_f", $_v);
 		}
 
 		return $queryBuilder;
 	}
 
-	private function _setPropertiesInstance( $instance )
+    private function _join($namespace, $alias, $fromAlias)
+    {
+        $definition_relations = array();
+        $model = $this->instance_model;
+        $instacen = new $namespace();
+        $join = array();
+
+        if($this->has_definition_relation)
+        {
+            $definition_relations = $model->getDefinitionRelations();
+
+            if(array_key_exists($namespace, $definition_relations))
+            {
+                $fieldLocal = $definition_relations[$namespace]['fieldLocal'];
+            }
+
+            $join = array(
+                'alias'         => $alias,
+                'table'         => $instacen::table,
+                'fromAlias'     => $fromAlias,
+                'condition'     => "{$fromAlias}.{$fieldLocal}={$alias}.".$instacen::primary,
+                'type'          => 'join'
+            );
+        }
+        else
+        {
+            $rF = new \ReflectionObject($instacen);
+
+            $definition_relations = ($rF->hasMethod('getDefinitionRelations')) ? $instacen->getDefinitionRelations() : array();
+
+            if(array_key_exists($this->namespace, $definition_relations))
+            {
+                $fieldLocal = $definition_relations[$this->namespace]['fieldLocal'];
+            }
+
+            $join = array(
+                'alias'         => $alias,
+                'table'         => $instacen::table,
+                'fromAlias'     => $fromAlias,
+                'condition'     => "{$fromAlias}.".$model::primary."={$alias}.{$fieldLocal}",
+                'type'          => 'join'
+            );
+        }
+
+        return $join;
+    }
+
+	private function _setPropertiesInstance($instance)
 	{
-		$ReflectionObject = new \ReflectionObject( $instance );
+		$ReflectionObject = new \ReflectionObject($instance);
 
 		$this->table = ($ReflectionObject->hasConstant('table')) ? $instance::table : null;
 		$this->primary = ($ReflectionObject->hasConstant('primary')) ? $instance::primary : null;
 		$this->title = ($ReflectionObject->hasConstant('title')) ? $instance::title : null;
 		$this->instance_model = $instance;
+        $this->has_definition_relation = $ReflectionObject->hasMethod('getDefinitionRelations') ? true: false;
 	}
-} 
+}

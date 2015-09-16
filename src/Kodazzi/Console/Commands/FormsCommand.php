@@ -86,18 +86,40 @@ Class FormsCommand extends Command
 
         // Obtiene el contenido del archivo *.yml
         $schema = array();
+        $schema_bundle = array();
+        $schema_temporary = array();
+        $file_schema = $path_schema . $version . '/schema.yml';
+
+        if(is_file($file_schema))
+        {
+            $schema = $yaml->parse(file_get_contents($file_schema));
+        }
 
         $finder = new Finder();
         $finder->files()->name('*.yml')->in(str_replace('\\', '/',$path_schema . $version . '/bundles/'.$bundle));
 
-        // Une todos los esquemas en un solo array
+        // Une todos los archivos yml en un solo array
         foreach( $finder as $file )
         {
+            $schema_file = $yaml->parse(file_get_contents($file));
+
             // Concatena el esquema de cada archivo conseguido
-            $schema = array_merge($schema, $yaml->parse(file_get_contents($file)));
+            $schema_temporary = array_merge($schema_temporary, $schema_file);
         }
 
-		$this->createForms( $input, $output, $bundle, $schema );
+        // Recorre todos los modelos buscando si alguno tiene el valor de model_translatable
+        // Y asi agregar este modelo al esquema
+        foreach($schema_temporary as $model => $config)
+        {
+            $schema_bundle = array_merge($schema_bundle, array($model => $schema[$model]));
+
+            if(array_key_exists('translatable', $config['options']) && array_key_exists($model.'Translation', $schema))
+            {
+                $schema_bundle = array_merge($schema_bundle, array($model.'Translation' => $schema[$model.'Translation']));
+            }
+        }
+
+        $this->createForms( $input, $output, $bundle, $schema_bundle );
 	}
 
 	private function createForms( $input, $output, $bundle, $schema )
@@ -128,8 +150,9 @@ Class FormsCommand extends Command
 			$GenerateClass->setNameClass( ucfirst( $table ) . 'FormBase' );
 			$GenerateClass->setNamespace( ucfirst( str_replace('/', '\\', $bundle) ) . '\Forms\Base' );
 			$GenerateClass->setValues( array(
-				'namespace_base_model' => ucfirst( $bundle ) . '\Models\\',
-				'model'		=> ucfirst( $bundle ) . '\Models\\' . ucfirst( $table ).'Model'
+				'namespace_base_model'  => ucfirst( $bundle ) . '\Models\\',
+				'model'		            => ucfirst( $bundle ) . '\Models\\' . ucfirst( $table ).'Model',
+                'form_translation'      => ucfirst( str_replace('/', '\\', $bundle) ) . '\Forms\\'.ucfirst( $table )
 			) );
 
 			$GenerateClass->create( YS_BUNDLES . $bundle . '/Forms/Base/' . ucfirst( $table ) . 'FormBase', $options );
