@@ -61,31 +61,36 @@ Class InterfaceForm implements \ArrayAccess
 		// Crea el widget para seguridad de ataque csrf
 		$this->setWidget('csrf_token', new \Kodazzi\Form\Fields\Csfr())->setValue($this->csrf_token);
 
-		if( $instance_model )
-		{
-			if( get_class( $instance_model ) == $this->name_model )
-			{
-				$this->model = $instance_model;
-			}
-			else
-			{
-				throw new \Exception( "No es un modelo valido para el formulario ". $this->name_form );
-			}
-		}
-
-		if( $this->model )
-		{
-			$widgets = $this->widgets;
-
-			foreach ( $widgets as $name_field => $widget )
-			{
-				if( isset( $this->model->$name_field ) )
-				{
-					$widget->setValue( $this->model->$name_field );
-				}
-			}
-		}
+        $this->setModel($instance_model);
 	}
+
+    public function setModel($instance_model)
+    {
+        if($instance_model)
+        {
+            if(is_object($instance_model) && get_class($instance_model) == $this->name_model)
+            {
+                $this->model = $instance_model;
+            }
+            else
+            {
+                throw new \Exception( "No es un modelo valido para el formulario ". $this->name_form );
+            }
+        }
+
+        if($this->model)
+        {
+            $widgets = $this->widgets;
+
+            foreach ($widgets as $name_field => $widget)
+            {
+                if( isset( $this->model->$name_field ) )
+                {
+                    $widget->setValue($this->model->$name_field);
+                }
+            }
+        }
+    }
 
 	public function offsetSet( $offset, $widget )
 	{
@@ -262,11 +267,24 @@ Class InterfaceForm implements \ArrayAccess
 
         // Obtiene todos los registros de lenguage de la bd
         $languages = \Service::get('db')->model($instaceModel::modelLanguage)->fetchAll();
+        $model = array();
+
+        // Si el formulario tiene una instancia del modelo lo utiliza
+        if($this->model)
+        {
+            $model = (isset($this->model->Translation) && is_array($this->model->Translation)) ? $this->model->Translation : array();
+        }
 
         foreach($languages as $lang)
         {
             $instanceTranslation = $this->getTranslationForm();
             $WidgetsTranslation = $instanceTranslation->getWidgets();
+
+            // Verifica si existe una instancia del modelo para el formulario y lo agrega.
+            if(count($model) && array_key_exists($lang->code, $model))
+            {
+                $instanceTranslation->setModel($model[$lang->code]);
+            }
 
             foreach($WidgetsTranslation as $field => $Widget)
             {
@@ -278,11 +296,15 @@ Class InterfaceForm implements \ArrayAccess
 
                 // Cambia el formato del campo para incorporar la clave del lenguage.
                 $Widget->setFormat($instanceTranslation->getNameForm().'['.$lang->code.']['.$Widget->getName().']');
+                $Widget->setId($instanceTranslation->getNameForm().'_'.$lang->code.'_'.$Widget->getName());
             }
 
             $Widgets['translation'][$lang->code]['title'] = $lang->name;
             $Widgets['translation'][$lang->code]['form'] = $instanceTranslation;
         }
+
+        // Elimina de la instancia del modelo la data de los formularios translation
+        unset($this->model->Translation);
 
         $this->is_translatable = true;
         $this->widgets = $Widgets;

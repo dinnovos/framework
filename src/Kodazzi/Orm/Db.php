@@ -31,6 +31,7 @@ class Db
 	protected $identifier = null;
 	protected $has_definition_relation = false;
     protected $QueryBuilder = null;
+    protected $alias = null;
 
 	private $conn = null;
 
@@ -76,11 +77,13 @@ class Db
         return $this;
     }
 
-    public function model($namespace = null)
+    public function model($namespace = null, $alias = 'a')
     {
         if($namespace)
         {
             $this->namespace = $namespace;
+
+            $this->alias = $alias;
 
             $this->_setPropertiesInstance( new $namespace() );
         }
@@ -131,15 +134,15 @@ class Db
 
         if($modelTranslation)
         {
-            $QueryBuilder->join('a', $instanceModelTranslation::table, 'tl', "a.".$model::primary."=tl.translatable_id");
+            $QueryBuilder->join('a', $instanceModelTranslation::table, 'b', "a.".$model::primary."=b.translatable_id");
         }
 
         if($modelLanguage)
         {
-            $QueryBuilder->join('tl', $instanceModelLanguage::table, 'lg', "lg.".$instanceModelLanguage::primary."=tl.language_id");
+            $QueryBuilder->join('b', $instanceModelLanguage::table, 'c', "c.".$instanceModelLanguage::primary."=b.language_id");
         }
 
-        $QueryBuilder->where("lg.code=:code");
+        $QueryBuilder->where("c.code=:code");
         $QueryBuilder->setParameter(":code", $lang);
 
         return $this;
@@ -185,34 +188,34 @@ class Db
 	{
 		$queryBuilder = $this->_buildQuery( $where, $fields, $order );
 
-		$queryBuilder->execute()->fetch();
+		//$queryBuilder->execute()->fetch();
 
 		if( $typeFetch == \PDO::FETCH_ASSOC )
 		{
 			return $queryBuilder->execute()->fetch();
 		}
 
-		return $queryBuilder->execute()->fetchObject( $this->namespace );
+		return $queryBuilder->execute()->fetchObject($this->namespace);
 	}
 
-	public function fetchAll( array $where = array(), $fields = '*', $typeFetch = \PDO::FETCH_CLASS, $order = null )
+	public function fetchAll(array $where = array(), $fields = '*', $typeFetch = \PDO::FETCH_CLASS, $order = null)
 	{
-		$queryBuilder = $this->_buildQuery( $where, $fields, $order );
+		$queryBuilder = $this->_buildQuery($where, $fields, $order);
 
-		if( $typeFetch == \PDO::FETCH_ASSOC )
+		if($typeFetch == \PDO::FETCH_ASSOC)
 		{
 			return $queryBuilder->execute()->fetchAll();
 		}
 
-		return $queryBuilder->execute()->fetchAll( \PDO::FETCH_CLASS, $this->namespace );
+		return $queryBuilder->execute()->fetchAll(\PDO::FETCH_CLASS, $this->namespace);
 	}
 
-	public function fetchForOptions( $where = array(), $fields = null)
+	public function fetchForOptions($where = array(), $fields = null)
 	{
 		$data = array();
-		$fields = ( $fields === null ) ? "a.{$this->primary}, a.{$this->title}" : $fields;
+		$fields = ($fields === null) ? "a.{$this->primary}, a.{$this->title}" : $fields;
 
-		$queryBuilder = $this->_buildQuery(  $where, $fields );
+		$queryBuilder = $this->_buildQuery($where, $fields);
 
 		$rows = $queryBuilder->execute()->fetchAll();
 
@@ -227,11 +230,53 @@ class Db
 		return $data;
 	}
 
-	public function exist( $where = array() )
-	{
-		$total = $this->count( $where );
+    public function fetchWithTranslation($lang = null, array $where = array(), $fields = '*',  $order = null)
+    {
+        $queryBuilder = $this->_buildQuery($where, $fields, $order);
+        $instance = $this->instance_model;
+        $primary = $instance::primary;
 
-		if( $total )
+        $result = $queryBuilder->execute()->fetchObject($this->namespace);
+
+        $ReflectionObject = new \ReflectionObject($instance);
+
+        if(!$ReflectionObject->hasConstant('modelTranslation') || !$ReflectionObject->hasConstant('modelLanguage'))
+        {
+            throw new \Exception("El modelo no tiene informacion para traduccion.");
+        }
+
+        if($lang == null)
+        {
+            $resultTranslation = \Service::get('db')->model($instance::modelTranslation)->join($instance::modelLanguage, 'b')->fetchAll(array('a.translatable_id' => $result->$primary), 'a.*, b.code');
+        }
+        else
+        {
+            $resultTranslation = \Service::get('db')->model($instance::modelTranslation)->join($instance::modelLanguage, 'b')->fetch(array('a.translatable_id' => $result->$primary, 'b.code'=> $lang), 'a.*, b.code');
+        }
+
+        if(is_object($resultTranslation))
+        {
+            $result->Translation = $resultTranslation;
+        }
+        else if(is_array($resultTranslation))
+        {
+            foreach($resultTranslation as $trans)
+            {
+                $code = $trans->code;
+                unset($trans->code);
+
+                $result->Translation[$code] = $trans;
+            }
+        }
+
+        return $result;
+    }
+
+	public function exist($where = array())
+	{
+		$total = $this->count($where);
+
+		if($total)
 		{
 			return true;
 		}
@@ -275,9 +320,9 @@ class Db
 
 	public function save( $instance = null )
 	{
-		$instance = ( $instance ) ? $instance : $this->instance_model;
+		$instance = ($instance) ? $instance : $this->instance_model;
 
-		$this->_setPropertiesInstance( $instance );
+		$this->_setPropertiesInstance($instance);
 
 		$primary = $this->primary;
 		$data = array();
@@ -316,7 +361,7 @@ class Db
 		}
 
 		/* Verifica si el campo primary existe y contiene algun valor */
-		if(isset( $data[$primary] ) && $data[$primary] )
+		if(array_key_exists($primary, $data) && $data[$primary] )
 		{
 			unset($data[$primary]);
 
@@ -361,9 +406,10 @@ class Db
 
 	private function _buildQuery($where = array(), $fields = '*', $order = array())
 	{
+        $alias = $this->alias;
 		$queryBuilder = $this->getQueryBuilder();
 		$queryBuilder->select($fields);
-		$queryBuilder->from($this->table, 'a');
+		$queryBuilder->from($this->table, $alias);
         $join_namespaces = $this->join_namespaces;
 
         // Verifica los joins
@@ -394,12 +440,14 @@ class Db
 		{
 			if($value === null)
 			{
-				$queryBuilder->andWhere("a.{$field} IS NULL");
+				$queryBuilder->andWhere("{$field} IS NULL");
 			}
 			else
 			{
-				$queryBuilder->andWhere("a.{$field}=:$field");
-				$queryBuilder->setParameter(":$field", $value);
+                $_field = str_replace('.', '', $field);
+
+				$queryBuilder->andWhere("{$field}=:$_field");
+				$queryBuilder->setParameter(":$_field", $value);
 			}
 		}
 
@@ -407,7 +455,7 @@ class Db
 		{
 			$_f = key($order);
 			$_v = current($order);
-			$queryBuilder->orderBy("a.$_f", $_v);
+			$queryBuilder->orderBy("$_f", $_v);
 		}
 
 		return $queryBuilder;
@@ -419,6 +467,7 @@ class Db
         $model = $this->instance_model;
         $instacen = new $namespace();
         $join = array();
+        $fieldLocal = '';
 
         if($this->has_definition_relation)
         {
@@ -427,17 +476,18 @@ class Db
             if(array_key_exists($namespace, $definition_relations))
             {
                 $fieldLocal = $definition_relations[$namespace]['fieldLocal'];
-            }
 
-            $join = array(
-                'alias'         => $alias,
-                'table'         => $instacen::table,
-                'fromAlias'     => $fromAlias,
-                'condition'     => "{$fromAlias}.{$fieldLocal}={$alias}.".$instacen::primary,
-                'type'          => 'join'
-            );
+                $join = array(
+                    'alias'         => $alias,
+                    'table'         => $instacen::table,
+                    'fromAlias'     => $fromAlias,
+                    'condition'     => "{$fromAlias}.{$fieldLocal}={$alias}.".$instacen::primary,
+                    'type'          => 'join'
+                );
+            }
         }
-        else
+
+        if(count($join) == 0)
         {
             $rF = new \ReflectionObject($instacen);
 
@@ -446,15 +496,15 @@ class Db
             if(array_key_exists($this->namespace, $definition_relations))
             {
                 $fieldLocal = $definition_relations[$this->namespace]['fieldLocal'];
-            }
 
-            $join = array(
-                'alias'         => $alias,
-                'table'         => $instacen::table,
-                'fromAlias'     => $fromAlias,
-                'condition'     => "{$fromAlias}.".$model::primary."={$alias}.{$fieldLocal}",
-                'type'          => 'join'
-            );
+                $join = array(
+                    'alias'         => $alias,
+                    'table'         => $instacen::table,
+                    'fromAlias'     => $fromAlias,
+                    'condition'     => "{$fromAlias}.".$model::primary."={$alias}.{$fieldLocal}",
+                    'type'          => 'join'
+                );
+            }
         }
 
         return $join;

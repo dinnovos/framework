@@ -249,4 +249,21 @@ Class Controller
         $DateTime = new \DateTime('NOW');
         return $DateTime->format( $string );
     }
+
+    public function addMethod($method, $name)
+    {
+        $this->{$name} = $method;
+    }
+
+    public function __call($method, $args)
+    {
+        if ( isset($this->{$method}) && $this->{$method} instanceof \Closure )
+        {
+            return call_user_func_array($this->{$method}, $args);
+        }
+        else
+        {
+            throw new \Exception("Invalid Method");
+        }
+    }
 }

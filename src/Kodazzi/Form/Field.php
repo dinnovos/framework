@@ -59,6 +59,7 @@ abstract Class Field
 	protected $field_option  = null;
 	protected $other_attributes  = null;
 	protected $format  = null;
+	protected $id  = null;
 
 	abstract public function valid();
 
@@ -167,7 +168,7 @@ abstract Class Field
 	 */
 	public function renderLabel( $value = null, $attributes = '' )
 	{
-		$for = $this->name_form . '_' . $this->name;
+		$for = ($this->id) ? $this->id : $this->name_form . '_' . $this->name;;
 
 		if (!$value)
 		{
@@ -394,9 +395,20 @@ abstract Class Field
 		return $this;
 	}
 
+    /**
+     * @return \Kodazzi\Form\Field
+     */
     public function setFormat($format)
     {
         $this->format = $format;
+    }
+
+    /**
+     * @return \Kodazzi\Form\Field
+     */
+    public function setId($id)
+    {
+        $this->id = $id;
     }
 
 	/*************************************************************************************************/

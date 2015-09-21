@@ -43,7 +43,7 @@ Class Name extends \Kodazzi\Form\Field
 			return '';
 
         $format = ($this->format) ? $this->format : $this->name_form . '[' . $this->name . ']';
-        $id = $this->name_form . '_' . $this->name;
+        $id = ($this->id) ? $this->id : $this->name_form . '_' . $this->name;
 
 		return \Kodazzi\Helper\FormHtml::input( $format, $this->value, $this->max_length, array(
 					'id' => $id,

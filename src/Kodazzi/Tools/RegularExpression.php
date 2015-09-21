@@ -13,6 +13,7 @@ namespace Kodazzi\Tools;
 Class RegularExpression
 {
     private static $email = '^[^0-9][a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*[@][a-zA-Z0-9_]+([.][a-zA-Z0-9_]+)*[.][a-zA-Z]{2,4}$';
+    private static $username = '^[a-zA-Z\@]+[a-zA-Z\@0-9]*$';
     private static $password = '^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,15}$';
     private static $rif = '^([JGVE]{1})-([0-9]{8})-([0-9]{1})$';
     private static $telephone = '^([0-9]){4}\-([0-9]){7}+$';
@@ -34,6 +35,10 @@ Class RegularExpression
         {
             case 'email':
                 return self::$email;
+                break;
+
+            case 'username':
+                return self::$username;
                 break;
 
             case 'password':
