@@ -368,8 +368,6 @@ abstract Class Field
 			throw new \Exception('El parametro debe ser boolean');
 		}
 
-		$this->field_tag = ($bool) ? 'hidden' : $this->field_tag;
-
 		$this->is_hidden = $bool;
 
 		return $this;

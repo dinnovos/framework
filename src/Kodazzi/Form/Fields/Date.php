@@ -12,7 +12,7 @@ namespace Kodazzi\Form\Fields;
 
 Class Date extends \Kodazzi\Form\Field
 {
-    protected $format = 'Y-m-d';
+    protected $format_date = 'Y-m-d';
 
 	public function valid()
 	{
@@ -39,7 +39,7 @@ Class Date extends \Kodazzi\Form\Field
         $format = ($this->format) ? $this->format : $this->name_form . '[' . $this->name . ']';
         $id = ($this->id) ? $this->id : $this->name_form . '_' . $this->name;
 
-        $value = ($this->value) ? \Kodazzi\Tools\Date::format($this->value, $this->format) : '';
+        $value = ($this->value) ? \Kodazzi\Tools\Date::format($this->value, $this->format_date) : '';
 
 		return \Kodazzi\Helper\FormHtml::input($format, $value, $this->max_length, array(
 					'id' => $id,
@@ -49,9 +49,9 @@ Class Date extends \Kodazzi\Form\Field
 				), $this->other_attributes );
 	}
 
-    public function setFormatDate( $format )
+    public function setFormatDate( $format_date )
     {
-        $this->format = $format;
+        $this->format_date = $format_date;
     }
 
 }

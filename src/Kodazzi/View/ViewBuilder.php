@@ -10,6 +10,7 @@
 
 namespace Kodazzi\View;
 
+use Service;
 use Kodazzi\Config\ConfigBuilderInterface;
 use Kodazzi\Session\User;
 use Symfony\Component\Routing\Generator\UrlGenerator;
@@ -45,6 +46,8 @@ Class ViewBuilder
         $this->Config = $config;
         $this->UrlGenerator = $url_generator;
 
+        $namespaces = Service::getNamespacesBundles();
+
         $theme_web = $config->get('app', 'theme_web');
         $theme_admin = $config->get('app', 'theme_admin');
         $enabled_path_themes = $config->get('app', 'enabled_path_themes');
@@ -74,6 +77,16 @@ Class ViewBuilder
             if(is_dir(YS_THEMES.$theme_admin.'/templates'))
             {
                 $path_templates[] = YS_THEMES.$theme_admin.'/templates';
+            }
+        }
+
+        foreach($namespaces as $namespace)
+        {
+            $path_bundles_templates = str_replace('\\', '/', YS_BUNDLES.$namespace.'templates' );
+
+            if(is_dir($path_bundles_templates))
+            {
+                $path_templates[] = $path_bundles_templates;
             }
         }
 
