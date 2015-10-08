@@ -104,12 +104,12 @@ Class ViewBuilder
 
         // Funcion para construir las url
         $cut_text = new \Twig_SimpleFunction('cut_text', function ( $string, $limit = 100, $end_char = '...' ) {
-            return \Kodazzi\Tools\String::cutText( $string, $limit, $end_char);
+            return \Kodazzi\Tools\StringProcessor::cutText( $string, $limit, $end_char);
         });
 
 		// Funcion para cortar texto muy largo.
 		$resume = new \Twig_SimpleFunction('resume', function ( $string, $limit = 100, $end_char = '...' ) {
-			return \Kodazzi\Tools\String::resume( $string, $limit, $end_char);
+			return \Kodazzi\Tools\StringProcessor::resume( $string, $limit, $end_char);
 		});
 
 		// Funcion para dar formato a un numero

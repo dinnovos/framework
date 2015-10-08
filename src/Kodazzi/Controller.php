@@ -234,7 +234,7 @@ Class Controller
 
     public function slug($string)
     {
-        $string = \Kodazzi\Tools\String::slug($string);
+        $string = \Kodazzi\Tools\StringProcessor::slug($string);
 
         return $string;
     }

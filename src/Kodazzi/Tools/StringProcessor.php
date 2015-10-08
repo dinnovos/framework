@@ -10,7 +10,7 @@
 
 namespace Kodazzi\Tools;
 
-Class String
+Class StringProcessor
 {
 	public static function slug( $string )
 	{

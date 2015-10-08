@@ -22,7 +22,7 @@ Class Name extends \Kodazzi\Form\Field
 		$default = '^[a-zA-Z\s]+$';
 
         // Reemplaza todas las vocales acentuadas
-        $value = \Kodazzi\Tools\String::replaceVowels( $this->value );
+        $value = \Kodazzi\Tools\StringProcessor::replaceVowels( $this->value );
 
 		if($this->pattern)
 		{

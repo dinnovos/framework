@@ -344,7 +344,7 @@ class Db
             // Si en la data existe un campo slug se utiliza en lugar de crearlo
             if(isset($data['slug']) && $data['slug'] != '')
             {
-                $data['slug'] = \Kodazzi\Tools\String::slug($data['slug']);
+                $data['slug'] = \Kodazzi\Tools\StringProcessor::slug($data['slug']);
             }
             else
             {
@@ -356,7 +356,7 @@ class Db
                     $slug .= $instance->$field_slug.' ';
                 }
 
-                $data['slug'] = \Kodazzi\Tools\String::slug($slug);
+                $data['slug'] = \Kodazzi\Tools\StringProcessor::slug($slug);
             }
 		}
 

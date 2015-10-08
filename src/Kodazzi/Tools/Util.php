@@ -167,7 +167,7 @@ Class Util
         $namespace = str_replace('/', '\\', $namespace);
         $bundles = \Service::getNamespacesBundles();
 
-        $namespace_slug = \Kodazzi\Tools\String::slug($namespace);
+        $namespace_slug = \Kodazzi\Tools\StringProcessor::slug($namespace);
         $bundles_activated = array();
         $action = strtolower($action);
 
@@ -178,7 +178,7 @@ Class Util
 
         foreach($bundles as $bundle)
         {
-            $bundle_slug = \Kodazzi\Tools\String::slug($bundle);
+            $bundle_slug = \Kodazzi\Tools\StringProcessor::slug($bundle);
             $bundles_activated[$bundle_slug] = trim($bundle,'\\');
         }
 
