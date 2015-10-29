@@ -277,6 +277,11 @@ Class FormHtml
 			$str_attribute .= 'readonly ';
 		}
 
+        if ( isset( $attribute['placeholder'] ) && $attribute['placeholder'] )
+        {
+            $str_attribute .= "placeholder='{$attribute['placeholder']}' ";
+        }
+
 		$tag = "<textarea name=\"$name\" $str_attribute $other_attribute cols=\"$cols\" rows=\"$rows\" >";
 
 		if ( $value != null )

@@ -82,6 +82,10 @@ Service::set('listener.response', function(){
     return new Symfony\Component\HttpKernel\EventListener\ResponseListener('UTF-8');
 });
 
+Service::set('listener.postaction', function(){
+    return new Kodazzi\Listeners\PostActionListener();
+});
+
 Service::set('event', function(){
     return new Kodazzi\EventDispatcher\Event();
 });
@@ -184,6 +188,7 @@ $dispatcher->addSubscriber(Service::get('listener.firewall'));
 $dispatcher->addSubscriber(Service::get('listener.controller'));
 $dispatcher->addSubscriber(Service::get('listener.response'));
 $dispatcher->addSubscriber(Service::get('listener.subrequest'));
+$dispatcher->addSubscriber(Service::get('listener.postaction'));
 
 // Registra la bolsa temporal en la session
 $session = Service::get('session');

@@ -51,7 +51,8 @@ Class Time extends \Kodazzi\Form\Field
 					'id' => $id,
 					'class' => $this->getClassCss(),
 					'disabled' => $this->isDisabled(),
-					'readonly' => $this->isReadonly()
+					'readonly' => $this->isReadonly(),
+                    'placeholder' => $this->getPlaceholder()
 				));
 	}
 

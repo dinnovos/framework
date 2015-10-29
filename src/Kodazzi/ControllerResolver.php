@@ -90,6 +90,8 @@ class ControllerResolver implements ControllerResolverInterface
 
         $callable = array($this->instantiateController($prepare['controller']), $prepare['action']);
 
+        $request->attributes->set('_callable', $callable);
+
         if (!is_callable($callable))
         {
             throw new \InvalidArgumentException(sprintf('Controller "%s" for URI "%s" is not callable.', $controller, $request->getPathInfo()));
