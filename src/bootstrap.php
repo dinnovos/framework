@@ -122,6 +122,10 @@ Service::set('mobile', function(){
     return new Detection\MobileDetect();
 });
 
+Service::set('image', function(){
+    return new Kodazzi\Tools\Image();
+});
+
 Service::set('php_mailer', function(){
     $path = YS_VND.'phpmailer/phpmailer/class.phpmailer.php';
 

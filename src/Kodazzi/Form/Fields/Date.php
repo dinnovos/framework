@@ -53,6 +53,7 @@ Class Date extends \Kodazzi\Form\Field
     public function setFormatDate( $format_date )
     {
         $this->format_date = $format_date;
-    }
 
+        return $this;
+    }
 }

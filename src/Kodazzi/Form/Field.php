@@ -42,6 +42,7 @@ abstract Class Field
 	protected $is_disabled = false;
 	protected $is_readonly = false;
 	protected $is_display = true;
+	protected $is_check = false;
 	protected $msg_help = null;
 	protected $msg_error = null;
 	protected $placeholder = null;
@@ -513,6 +514,11 @@ abstract Class Field
 		return $this->is_display;
 	}
 
+    public function isCheck()
+    {
+        return $this->is_check;
+    }
+
 	public function hasUpload()
 	{
 		return (is_bool($this->has_upload)) ? $this->has_upload : false;
@@ -542,14 +548,14 @@ abstract Class Field
 		{
 			if ( $this->max_length && strlen($data) > $this->max_length )
 			{
-				$msg = (!$this->msg_max_length) ? $this->I18n->get('max_length', 'Is Invalid.') : $this->msg_max_length;
+				$msg = (!$this->msg_max_length) ? $this->I18n->get('form.max_length', 'Is Invalid.') : $this->msg_max_length;
 				$this->msg_error = strtr($msg, array('%name%' => $this->getValueLabel(), '%max%' => $this->max_length));
 				return false;
 			}
 
 			if ($this->min_length && strlen($data) < $this->min_length)
 			{
-				$msg = (!$this->msg_min_length) ? $this->I18n->get('min_length', 'Is Invalid.') : $this->msg_min_length;
+				$msg = (!$this->msg_min_length) ? $this->I18n->get('form.min_length', 'Is Invalid.') : $this->msg_min_length;
 				$this->msg_error = strtr($msg, array('%name%' => $this->getValueLabel(), '%min%' => $this->min_length));
 
 				return false;
@@ -562,7 +568,7 @@ abstract Class Field
 		// Llama al validador del widget
 		if ( !$this->valid() )
 		{
-			$this->msg_error = ( $this->msg_error ) ? $this->msg_error : $this->I18n->get( strtolower($type), 'Is Invalid.' );
+			$this->msg_error = ( $this->msg_error ) ? $this->msg_error : $this->I18n->get( 'form.'.strtolower($type), 'Is Invalid.' );
 
 			$this->value = null;
 
@@ -593,7 +599,7 @@ abstract Class Field
 
 			if( $exist )
 			{
-				$this->msg_error = $this->I18n->get('unique', 'Is unique.' );
+				$this->msg_error = $this->I18n->get('form.unique', 'Is unique.' );
 				
 				return false;
 			}

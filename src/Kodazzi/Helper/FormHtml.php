@@ -384,9 +384,8 @@ Class FormHtml
 	 *
 	 * @return String
 	 */
-	static public function checkbox( $name, $value = null, $checked = false, $attribute = array() )
+	static public function checkbox( $name, $value = '', $checked = false, $attribute = array() )
 	{
-		$id = 'id="' . $name . '"';
 		$class = '';
 
 		if ( $checked )
@@ -396,15 +395,25 @@ Class FormHtml
 
 		if ( isset( $attribute['id'] ) && $attribute['id'] != null )
 		{
-			$id = 'id="' . $attribute['id'] . '"';
+            $str_attribute = 'id="' . $attribute['id'] . '" ';
 		}
 
 		if ( isset( $attribute['class'] ) && $attribute['class'] != null )
 		{
-			$class = 'class="' . $attribute['class'] . '"';
+            $str_attribute = 'class="' . $attribute['class'] . '" ';
 		}
 
-		return "<input type=\"checkbox\" name=\"$name\" value=\"$value\" $checked  $id $class />";
+        if ( isset( $attribute['disabled'] ) && $attribute['disabled'] )
+        {
+            $str_attribute .= 'disabled ';
+        }
+
+        if ( isset( $attribute['readonly'] ) && $attribute['readonly'] )
+        {
+            $str_attribute .= 'readonly ';
+        }
+
+		return "<input type=\"checkbox\" name=\"$name\" value=\"$value\" $checked  $str_attribute />";
 	}
 
 	/**

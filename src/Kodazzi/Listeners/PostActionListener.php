@@ -30,7 +30,10 @@ class PostActionListener implements EventSubscriberInterface
 
         $attributes = $event->getRequest()->attributes->all();
 
-        $attributes['_callable'][0]->postAction();
+        if( array_key_exists('_callable', $attributes) && array_key_exists('0', $attributes['_callable']) && is_object($attributes['_callable'][0]))
+        {
+            $attributes['_callable'][0]->postAction();
+        }
     }
 
     public static function getSubscribedEvents()

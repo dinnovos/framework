@@ -174,6 +174,12 @@ Class InterfaceForm implements \ArrayAccess
 		throw new \Exception( "El campo '$field' no es v&aacute;lido." );
 	}
 
+    public function setValid($is_valid, $msg = null)
+    {
+        $this->is_valid = (is_bool($is_valid)) ? $is_valid : true;
+        $this->msg_global_error = $msg;
+    }
+
     public function setData($key, $value)
     {
         $this->data[$key] = $value;

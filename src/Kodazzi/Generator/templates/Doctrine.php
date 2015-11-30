@@ -32,6 +32,8 @@ $<?php echo $model ?>->addColumn("<?php echo $field ?>", "datetime", array('notn
 $<?php echo $model ?>->addColumn("<?php echo $field ?>", "time", array('notnull' => <?php echo ( isset($config['notnull']) && !$config['notnull']) ? 'false' : 'true'; ?>));
 <?php } elseif( in_array($config['type'] , array('options') ) ){ ?>
 $<?php echo $model ?>->addColumn("<?php echo $field ?>", "string", array("length" => 100, 'notnull' => <?php echo ( isset($config['notnull']) && !$config['notnull']) ? 'false' : 'true'; ?>));
+<?php } elseif( in_array($config['type'] , array('check') ) ){ ?>
+$<?php echo $model ?>->addColumn("<?php echo $field ?>", "string", array("length" => 2, 'notnull' => false));
 <?php } elseif( in_array($config['type'] , array('foreign') ) ){ ?>
 <?php if( in_array($config['relation'], array('many-to-one', 'one-to-one')) ){ ?>
 $<?php echo $model ?>->addColumn("<?php echo $config['join']['name'] ?>", "integer", array('unsigned' => true, 'notnull' => <?php echo ( isset($config['notnull']) && !$config['notnull']) ? 'false' : 'true'; ?>));

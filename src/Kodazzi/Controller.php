@@ -134,6 +134,11 @@ Class Controller
         return Service::get('kernel.request')->query->all();
     }
 
+    public function getFILES()
+    {
+        return Service::get('kernel.request')->files->all();
+    }
+
     /**
      * @return DetectionMobile_Detect
      */
