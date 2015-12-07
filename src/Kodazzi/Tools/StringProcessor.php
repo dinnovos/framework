@@ -151,7 +151,7 @@ Class StringProcessor
 
         if (strlen($str) <= $n)
         {
-            return htmlentities($str, ENT_QUOTES, 'UTF-8').$end_char;;
+            return htmlentities($str, ENT_QUOTES, 'UTF-8');
         }
 
         return htmlentities(substr($str, 0, $n), ENT_QUOTES, 'UTF-8').$end_char;

@@ -287,6 +287,10 @@ Class FormBuilder extends InterfaceForm
                     }
                 }
             }
+        }// Si el campo no existe en la data y es tipo check se almacena vacio o null
+        else if($type == 'CHECK')
+        {
+            $this->clean_data[$name_field] = '';
         }
     }
 
