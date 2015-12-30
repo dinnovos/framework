@@ -151,7 +151,6 @@ Class ValidateSchema
 	private function isValidRelation($table, $field, $options)
 	{
 		$schema = $this->schema;
-
 		/*
 		 * model, es requerido.
 		 */
@@ -184,14 +183,14 @@ Class ValidateSchema
 
 			return;
 		}
-		
+
 		switch ($options['relation'])
 		{
 			case 'one-to-one':
 			case 'many-to-one':
 			case 'one-to-many':
 			case 'many-to-one-self-referencing':
-				
+
 				/* El parametro model debe ser diferente a la misma */
 				
 				if($options['relation'] == 'many-to-one-self-referencing')
@@ -238,12 +237,23 @@ Class ValidateSchema
 				break;
 			
 			case 'many-to-many':
+			case 'many-to-many-self-referencing':
+
 				/* El parametro model debe ser diferente a la misma */
-				if($table == $options['model'])
+				if($options['relation'] == 'many-to-many' && $table == $options['model'])
 				{
 					$this->is_valid = false;
 					$this->errors[] = '- Tabla ' . ucfirst($table) . ': En el campo "' . $field . '", el parametro "model" debe hacer referencia a una entidad diferente a "'.$table.'".';
 				}
+
+                if($options['relation'] == 'many-to-many-self-referencing')
+                {
+                    if($table != $options['model'])
+                    {
+                        $this->is_valid = false;
+                        $this->errors[] = '- Tabla ' . ucfirst($table) . ': En el campo "' . $field . '", el parametro "model" debe hacer referencia al mismo modelo "'.$table.'".';
+                    }
+                }
 				
 				if($options['type'] != 'table')
 				{
@@ -307,7 +317,6 @@ Class ValidateSchema
 	/*
 	 * Verifica las opciones de la tabla
 	 */
-
 	private function tableOptionsIsValid($table, $options)
 	{
 		/* table */

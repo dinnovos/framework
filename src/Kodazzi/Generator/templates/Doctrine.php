@@ -3,6 +3,7 @@
 $unique = array();
 $primary = array();
 $manytomany = array();
+$manytomanyself = array();
 ?>
 $schema = new \Doctrine\DBAL\Schema\Schema();
 <?php foreach( $data as $model => $data ) { ?>
@@ -44,6 +45,8 @@ $<?php echo $model ?>->addForeignKeyConstraint($<?php echo $config['model'] ?>, 
 <?php } ?>
 <?php } elseif( in_array($config['type'], array('table')) && $config['relation'] == 'many-to-many'){ ?>
 <?php $manytomany[$model] = $config; ?>
+<?php } elseif( in_array($config['type'], array('table')) && $config['relation'] == 'many-to-many-self-referencing'){ ?>
+<?php $manytomanyself[$model] = $config; ?>
 <?php } ?>
 <?php if( isset($unique) && count( $unique ) ){ ?>
 $<?php echo $model ?>->addUniqueIndex(<?php echo \Kodazzi\Tools\Util::parsetArrayToString($unique); ?>);
@@ -67,10 +70,20 @@ $<?php echo $model ?>->addColumn("slug", "string", array("length" => 255, 'notnu
 
 <?php if( count( $manytomany ) ){ ?>
 <?php foreach($manytomany as $model => $many){ ?>
-$<?php echo $many['joinTable']['name'] ?> = $schema->createTable("<?php echo $many['joinTable']['name'] ?>");
+$<?php echo $many['joinTable']['name'] ?> = $schema->createTable("<?php echo $options['_prefix']?><?php echo $many['joinTable']['name'] ?>");
 $<?php echo $many['joinTable']['name'] ?>->addColumn("<?php echo $many['joinTable']['join']['name'] ?>", "integer", array('unsigned' => true));
 $<?php echo $many['joinTable']['name'] ?>->addColumn("<?php echo $many['joinTable']['inverseJoin']['name'] ?>", "integer", array('unsigned' => true));
 $<?php echo $many['joinTable']['name'] ?>->addForeignKeyConstraint($<?php echo $model ?>, array("<?php echo $many['joinTable']['join']['name'] ?>"), array("<?php echo $many['joinTable']['join']['foreignField'] ?>"));
+$<?php echo $many['joinTable']['name'] ?>->addForeignKeyConstraint($<?php echo $many['model'] ?>, array("<?php echo $many['joinTable']['inverseJoin']['name'] ?>"), array("<?php echo $many['joinTable']['inverseJoin']['foreignField'] ?>"));
+<?php } ?>
+<?php } ?>
+
+<?php if( count( $manytomanyself ) ){ ?>
+<?php foreach($manytomanyself as $model => $many){ ?>
+$<?php echo $many['joinTable']['name'] ?> = $schema->createTable("<?php echo $options['_prefix']?><?php echo $many['joinTable']['name'] ?>");
+$<?php echo $many['joinTable']['name'] ?>->addColumn("<?php echo $many['joinTable']['join']['name'] ?>", "integer", array('unsigned' => true));
+$<?php echo $many['joinTable']['name'] ?>->addColumn("<?php echo $many['joinTable']['inverseJoin']['name'] ?>", "integer", array('unsigned' => true));
+$<?php echo $many['joinTable']['name'] ?>->addForeignKeyConstraint($<?php echo $many['model'] ?>, array("<?php echo $many['joinTable']['join']['name'] ?>"), array("<?php echo $many['joinTable']['join']['foreignField'] ?>"));
 $<?php echo $many['joinTable']['name'] ?>->addForeignKeyConstraint($<?php echo $many['model'] ?>, array("<?php echo $many['joinTable']['inverseJoin']['name'] ?>"), array("<?php echo $many['joinTable']['inverseJoin']['foreignField'] ?>"));
 <?php } ?>
 <?php } ?>

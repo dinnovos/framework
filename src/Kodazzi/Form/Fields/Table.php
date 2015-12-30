@@ -105,7 +105,7 @@ Class Table extends \Kodazzi\Form\Field
 		}
 	}
 	
-	public function renderLabel($value = null)
+	public function renderLabel($value = null, $attributes = '')
 	{
 		if (!$value)
 		{
