@@ -38,7 +38,7 @@ Class TranslatorBuilder
 
         foreach($bundles as $bundle)
         {
-            $path_i18n = str_replace('\\', '/', YS_BUNDLES.$bundle.'i18n/'.$part_locale[0]);
+            $path_i18n = str_replace('\\', '/', Ki_BUNDLES.$bundle.'i18n/'.$part_locale[0]);
 
             if(is_dir($path_i18n))
             {
@@ -55,7 +55,7 @@ Class TranslatorBuilder
             }
         }
 
-        $path_i18n = str_replace('\\', '/', YS_APP.'src/i18n/'.$part_locale[0]);
+        $path_i18n = str_replace('\\', '/', Ki_APP.'src/i18n/'.$part_locale[0]);
 
         if(is_dir($path_i18n))
         {

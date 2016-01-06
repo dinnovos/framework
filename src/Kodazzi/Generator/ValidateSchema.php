@@ -374,7 +374,7 @@ Class ValidateSchema
 		$type = $options['type'];
 		$_tmp_option = $options;
 		$definition = array();
-		$definition_fields = $yaml->parse( file_get_contents(YS_APP . 'config/schema/fields.yml') );
+		$definition_fields = $yaml->parse( file_get_contents(Ki_APP . 'config/schema/fields.yml') );
 
 		/* Valida el tipo de campo */
 		if (!isset($definition_fields[$type]))

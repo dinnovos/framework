@@ -41,7 +41,7 @@ class Db
     {
         $Config = \Service::get('config');
 
-        $connectionOptions = (YS_ENVIRONMENT == 'prod') ? $Config->get('db', 'prod') :  $Config->get('db', 'dev') ;
+        $connectionOptions = (Ki_ENVIRONMENT == 'prod') ? $Config->get('db', 'prod') :  $Config->get('db', 'dev') ;
 
         if( isset($connectionOptions[ $connection ]) )
         {

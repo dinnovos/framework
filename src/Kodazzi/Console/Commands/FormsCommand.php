@@ -55,7 +55,7 @@ Class FormsCommand extends Command
 		$bundle = trim($bundle, '/');
 		$bundle = trim($bundle, '\\');
 
-        $path_schema = YS_APP . 'src/storage/schemas/';
+        $path_schema = Ki_APP . 'src/storage/schemas/';
 
         if($version === null)
         {
@@ -127,20 +127,20 @@ Class FormsCommand extends Command
 		$GenerateClass = Service::get( 'generate_class' );
 
 		/* Crea el directorio donde se crearan las clases de los formularios */
-		$this->mkdir( YS_BUNDLES . $bundle . '/Forms/Base' );
+		$this->mkdir( Ki_BUNDLES . $bundle . '/Forms/Base' );
 
 		$output->write( PHP_EOL . "Lista de Clases Forms:" . PHP_EOL );
 
 		foreach ( $schema as $table => $options )
 		{
 			/* Si la clase extendida existe no la sobreescribe */
-			if ( !is_file( YS_BUNDLES . $bundle . '/Forms/' . ucfirst( $table ) . 'Form.php' ) )
+			if ( !is_file( Ki_BUNDLES . $bundle . '/Forms/' . ucfirst( $table ) . 'Form.php' ) )
 			{
 				$GenerateClass->setTemplate( 'Forms' );
 				$GenerateClass->setNameClass(  ucfirst( $table ) . 'Form' );
 				$GenerateClass->setNamespace( ucfirst( str_replace('/', '\\', $bundle) ) . '\Forms' );
                 $GenerateClass->setNameClassExtend( 'Base\\'.ucfirst($table).'FormBase' );
-				$GenerateClass->create( YS_BUNDLES . $bundle . '/Forms/' . ucfirst( $table ) . 'Form', $options );
+				$GenerateClass->create( Ki_BUNDLES . $bundle . '/Forms/' . ucfirst( $table ) . 'Form', $options );
 
 				$output->write( " - Clase Form '" . ucfirst( $table ) . "Form' fue creada correctamente." . PHP_EOL );
 			}
@@ -155,7 +155,7 @@ Class FormsCommand extends Command
                 'form_translation'      => ucfirst( str_replace('/', '\\', $bundle) ) . '\Forms\\'.ucfirst( $table )
 			) );
 
-			$GenerateClass->create( YS_BUNDLES . $bundle . '/Forms/Base/' . ucfirst( $table ) . 'FormBase', $options );
+			$GenerateClass->create( Ki_BUNDLES . $bundle . '/Forms/Base/' . ucfirst( $table ) . 'FormBase', $options );
 
 			$output->write( " - Clase Form '" . ucfirst( $table ) . "FormBase' creada correctamente." . PHP_EOL );
 		}

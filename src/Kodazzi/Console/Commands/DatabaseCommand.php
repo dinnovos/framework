@@ -42,7 +42,7 @@ Class DatabaseCommand extends Command
         $version = $input->getArgument('version');
         $helper = $this->getHelper('question');
 
-        $path_schema = YS_APP . 'src/storage/schemas/';
+        $path_schema = Ki_APP . 'src/storage/schemas/';
 
         if($version === null)
         {
@@ -68,7 +68,7 @@ Class DatabaseCommand extends Command
 
 		if( !is_dir( $path_schema . $version ) )
 		{
-			$output->writeln( PHP_EOL . " <error>No se encontro el esquema dentro del directorio: ".YS_SYSTEM."app/src/storage/schemas/{$version}</error>" . PHP_EOL );
+			$output->writeln( PHP_EOL . " <error>No se encontro el esquema dentro del directorio: ".Ki_SYSTEM."app/src/storage/schemas/{$version}</error>" . PHP_EOL );
 			exit;
 		}
 

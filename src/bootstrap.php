@@ -8,23 +8,23 @@
  * file that was distributed with this source code.
  */
 
-define( 'YS_SRC_ROOT', realpath(dirname(__FILE__) . '/../') . '/src/');
-define( 'YS_CACHE', YS_APP . 'src/cache/' );
-define( 'YS_EXT_TEMPLATE', '.twig' );
+define( 'Ki_SRC_ROOT', realpath(dirname(__FILE__) . '/../') . '/src/');
+define( 'Ki_CACHE', Ki_APP . 'src/cache/' );
+define( 'Ki_EXT_TEMPLATE', '.twig' );
 
 // Se utiliza el autoloader de Composer
-$loader = require_once YS_VND.'autoload.php';
+$loader = require_once Ki_VND.'autoload.php';
 
-$loader->set('Kodazzi\\', array(YS_SRC_ROOT));
-$loader->set('Kodazzi\Facade\\', array(YS_SRC_ROOT));
-$loader->set('Main\\', array(YS_APP));
-$loader->set('Providers\\', array(YS_APP));
-$loader->set('Events\\', array(YS_APP));
-$loader->set('Listeners\\', array(YS_APP));
+$loader->set('Kodazzi\\', array(Ki_SRC_ROOT));
+$loader->set('Kodazzi\Facade\\', array(Ki_SRC_ROOT));
+$loader->set('Main\\', array(Ki_APP));
+$loader->set('Providers\\', array(Ki_APP));
+$loader->set('Events\\', array(Ki_APP));
+$loader->set('Listeners\\', array(Ki_APP));
 
 use Symfony\Component\Debug\Debug;
 
-if ( YS_DEBUG )
+if ( Ki_DEBUG )
 {
     Debug::enable();
 }
@@ -127,13 +127,13 @@ Service::set('image', function(){
 });
 
 Service::set('php_mailer', function(){
-    $path = YS_VND.'phpmailer/phpmailer/class.phpmailer.php';
+    $path = Ki_VND.'phpmailer/phpmailer/class.phpmailer.php';
 
     if( is_file( $path ) )
     {
         require_once $path;
 
-        return new PHPMailer( YS_DEBUG );
+        return new PHPMailer( Ki_DEBUG );
     }
 
     return null;
@@ -201,7 +201,7 @@ $session->registerBag(Service::get('temporary_bag'));
 // Arranca la session
 $session->start();
 
-include YS_APP.'AppKernel.php';
+include Ki_APP.'AppKernel.php';
 
 // Agrega al contenedor la instancia de Request y loader.
 

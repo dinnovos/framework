@@ -53,36 +53,36 @@ Class ViewBuilder
         $enabled_path_themes = $config->get('app', 'enabled_path_themes');
 
 		$path_templates = array(
-			YS_APP.'src/layouts',
-			YS_APP.'src/templates'
+			Ki_APP.'src/layouts',
+			Ki_APP.'src/templates'
 		);
 
         if($enabled_path_themes)
         {
-            if(is_dir(YS_THEMES.$theme_web.'/layouts'))
+            if(is_dir(Ki_BUNDLES.$theme_web.'/layouts'))
             {
-                $path_templates[] = YS_THEMES.$theme_web.'/layouts';
+                $path_templates[] = Ki_BUNDLES.$theme_web.'/layouts';
             }
 
-            if(is_dir(YS_THEMES.$theme_web.'/templates'))
+            if(is_dir(Ki_BUNDLES.$theme_web.'/templates'))
             {
-                $path_templates[] = YS_THEMES.$theme_web.'/templates';
+                $path_templates[] = Ki_BUNDLES.$theme_web.'/templates';
             }
 
-            if(is_dir(YS_THEMES.$theme_admin.'/layouts'))
+            if(is_dir(Ki_BUNDLES.$theme_admin.'/layouts'))
             {
-                $path_templates[] = YS_THEMES.$theme_admin.'/layouts';
+                $path_templates[] = Ki_BUNDLES.$theme_admin.'/layouts';
             }
 
-            if(is_dir(YS_THEMES.$theme_admin.'/templates'))
+            if(is_dir(Ki_BUNDLES.$theme_admin.'/templates'))
             {
-                $path_templates[] = YS_THEMES.$theme_admin.'/templates';
+                $path_templates[] = Ki_BUNDLES.$theme_admin.'/templates';
             }
         }
 
         foreach($namespaces as $namespace)
         {
-            $path_bundles_templates = str_replace('\\', '/', YS_BUNDLES.$namespace.'templates' );
+            $path_bundles_templates = str_replace('\\', '/', Ki_BUNDLES.$namespace.'templates' );
 
             if(is_dir($path_bundles_templates))
             {
@@ -93,8 +93,8 @@ Class ViewBuilder
 		$Twig_Loader_Filesystem = new \Twig_Loader_Filesystem( $path_templates );
 
 		$Twig = new \Twig_Environment( null, array(
-			'cache' => YS_CACHE.'views',
-			'debug' => YS_DEBUG,
+			'cache' => Ki_CACHE.'views',
+			'debug' => Ki_DEBUG,
 		));
 
 		// Funcion para construir las url
@@ -235,7 +235,7 @@ Class ViewBuilder
                     $tpl = \Kodazzi\Tools\Inflector::underscore($parts[1]);
                 }
 
-                $path = YS_BUNDLES.$parts[0].'/views/'.strtolower($tpl);
+                $path = Ki_BUNDLES.$parts[0].'/views/'.strtolower($tpl);
 
                 $enabled_path_themes = $this->Config->get('app', 'enabled_path_themes');
 
@@ -252,7 +252,7 @@ Class ViewBuilder
                     }
 
                     $parts[0] = ltrim(str_replace(array('@admin', '@web'), '', $parts[0]), '/');
-                    $path = YS_THEMES.$theme.'/'.$parts[0].'/views/'.strtolower($tpl);
+                    $path = Ki_BUNDLES.$theme.'/'.$parts[0].'/views/'.strtolower($tpl);
                 }
 
 				$this->Twig_Loader_Filesystem->addPath($path);
@@ -262,7 +262,7 @@ Class ViewBuilder
 			}
 		}
 
-		return $this->Twig->render( $template.YS_EXT_TEMPLATE, $data );
+		return $this->Twig->render( $template.Ki_EXT_TEMPLATE, $data );
 	}
 
 	public function msgSuccess( $msg )

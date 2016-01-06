@@ -199,13 +199,13 @@ Class Util
         $GenerateClass->setTemplate('AppKernel');
         $GenerateClass->setNameClass('AppKernel');
         $GenerateClass->setNameClassExtend('Kernel');
-        $GenerateClass->create(YS_APP. 'AppKernel', array('bundles'=>$bundles_activated));
+        $GenerateClass->create(Ki_APP. 'AppKernel', array('bundles'=>$bundles_activated));
 
         // Elimina el directorio del bundle
-        if($action == 'delete' && is_dir(YS_BUNDLES.str_replace('\\', '/', $namespace)))
+        if($action == 'delete' && is_dir(Ki_BUNDLES.str_replace('\\', '/', $namespace)))
         {
             $fs = new \Symfony\Component\Filesystem\Filesystem();
-            $fs->remove(YS_BUNDLES.str_replace('\\', '/', $namespace));
+            $fs->remove(Ki_BUNDLES.str_replace('\\', '/', $namespace));
         }
     }
 }

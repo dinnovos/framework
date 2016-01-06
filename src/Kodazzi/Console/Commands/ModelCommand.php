@@ -57,7 +57,7 @@ Class ModelCommand extends Command
 		$bundle = trim($bundle, '/');
 		$bundle = trim($bundle, '\\');
 
-        $path_schema = YS_APP . 'src/storage/schemas/';
+        $path_schema = Ki_APP . 'src/storage/schemas/';
 
         if($version === null)
         {
@@ -132,17 +132,17 @@ Class ModelCommand extends Command
 
 		$output->write( PHP_EOL . "Lista de clases para el modelo:" . PHP_EOL );
 
-		$this->mkdir( YS_BUNDLES . $bundle . '/Models/Base/' );
+		$this->mkdir( Ki_BUNDLES . $bundle . '/Models/Base/' );
 
 		foreach ( $schema as $table => $options )
 		{
-			if( !is_file(YS_BUNDLES . $bundle . '/Models/' . ucfirst( $table ).'Model.php') )
+			if( !is_file(Ki_BUNDLES . $bundle . '/Models/' . ucfirst( $table ).'Model.php') )
 			{
 				$GenerateClass->setTemplate( 'Model' );
 				$GenerateClass->setNameClass( ucfirst($table).'Model' );
 				$GenerateClass->setNamespace( ucfirst( str_replace('/', '\\', $bundle) ) . '\Models' );
 				$GenerateClass->setNameClassExtend( 'Base\\'.ucfirst($table).'ModelBase' );
-				$GenerateClass->create( YS_BUNDLES . $bundle . '/Models/' . ucfirst( $table ).'Model', $options );
+				$GenerateClass->create( Ki_BUNDLES . $bundle . '/Models/' . ucfirst( $table ).'Model', $options );
 
 				$output->write( " - Clase Model $table del Bundle $bundle, fue creada correctamente." . PHP_EOL );
 			}
@@ -157,7 +157,7 @@ Class ModelCommand extends Command
                 'model'     => $table
             ) );
 
-			$GenerateClass->create( YS_BUNDLES . $bundle . '/Models/Base/' . ucfirst( $table ).'ModelBase', $options );
+			$GenerateClass->create( Ki_BUNDLES . $bundle . '/Models/Base/' . ucfirst( $table ).'ModelBase', $options );
 
 			$output->write( " - Clase Model Base$table del Bundle $bundle, fue creada correctamente." . PHP_EOL );
 		}

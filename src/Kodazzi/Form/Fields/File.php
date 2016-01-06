@@ -38,7 +38,7 @@ Class File extends \Kodazzi\Form\Field
 
 		$name_form = strtolower($this->getNameForm());
 
-		$this->path_upload = YS_PUBLIC . YS_UPLOAD . $name_form . '/';
+		$this->path_upload = Ki_PUBLIC . Ki_UPLOAD . $name_form . '/';
 
 		$Form = $this->getForm();
 		$path_upload = $Form->getPathUpload();
