@@ -2,7 +2,7 @@
 /**
  * This file is part of the Kodazzi Framework.
  *
- * (c) Jorge Gaitan <jgaitan@kodazzi.com>
+ * (c) Jorge Gaitan <info@kodazzi.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -33,10 +33,10 @@ else
     ini_set( 'display_errors', 0 );
 }
 
-
 Kodazzi\Backing\Alias::set('Service', 'Kodazzi\Container\Service');
 Kodazzi\Backing\Alias::set('Db', 'Kodazzi\Facade\Db');
 Kodazzi\Backing\Alias::set('Event', 'Kodazzi\Facade\Event');
+Kodazzi\Backing\Alias::set('Routing', 'Kodazzi\Facade\Routing');
 
 Service::set('kernel.context', function(){
     return new Symfony\Component\Routing\RequestContext();
@@ -108,6 +108,10 @@ Service::set('user_card_manager', function(){
 
 Service::factory('generic_user_card', function(){
     return new Kodazzi\Security\Card\GenericUserCard();
+});
+
+Service::set('routing', function(){
+    return new Kodazzi\Routing\Routing();
 });
 
 Service::set('view', function(){

@@ -2,7 +2,7 @@
  /**
  * This file is part of the Kodazzi Framework.
  *
- * (c) Jorge Gaitan <jgaitan@kodazzi.com>
+ * (c) Jorge Gaitan <info@kodazzi.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -11,6 +11,7 @@
 namespace Kodazzi\Container;
 
 use Kodazzi\Container\ServiceContainerInterface;
+use Kodazzi\Routing\Routing;
 
 Class Service
 {
@@ -109,5 +110,13 @@ Class Service
     public static function register(ServiceProviderInterface $provider)
     {
         $provider->register();
+    }
+
+    /**
+     * @return Routing
+     */
+    public static function Routing()
+    {
+        return self::get('routing');
     }
 }
