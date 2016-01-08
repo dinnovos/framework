@@ -31,6 +31,11 @@ class GenericUserCard implements CardInterface
         $this->attributes = $attributes;
     }
 
+    public function setAttribute($key, $value)
+    {
+        $this->attributes[$key] = $value;
+    }
+
     public function getUser()
     {
         return $this->user;
