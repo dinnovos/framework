@@ -23,6 +23,9 @@ class CardManager
         $this->Session = $session;
     }
 
+    /**
+     * @return CardInterface
+     */
     public function getCard()
     {
         if($this->Session->has('user_card'))
