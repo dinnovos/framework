@@ -34,11 +34,11 @@ Class TranslatorBuilder
         $data = array();
         $part_locale = explode('_', $locale);
 
-        $bundles = Service::getNamespacesBundles();
+        $bundles = Service::getBundles();
 
         foreach($bundles as $bundle)
         {
-            $path_i18n = str_replace('\\', '/', Ki_BUNDLES.$bundle.'i18n/'.$part_locale[0]);
+            $path_i18n = str_replace('\\', '/', $bundle->getPath().'/i18n/'.$part_locale[0]);
 
             if(is_dir($path_i18n))
             {

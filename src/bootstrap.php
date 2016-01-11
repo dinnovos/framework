@@ -21,6 +21,7 @@ $loader->set('Main\\', array(Ki_APP));
 $loader->set('Providers\\', array(Ki_APP));
 $loader->set('Events\\', array(Ki_APP));
 $loader->set('Listeners\\', array(Ki_APP));
+$loader->set('', array(Ki_BUNDLES));
 
 use Symfony\Component\Debug\Debug;
 

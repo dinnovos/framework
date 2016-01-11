@@ -12,6 +12,7 @@ namespace Kodazzi;
 
 use Service;
 use Symfony\Component\HttpKernel\HttpKernel;
+use Symfony\Component\Finder\Finder;
 
 class Kernel extends HttpKernel
 {
@@ -32,7 +33,7 @@ class Kernel extends HttpKernel
         $this->start();
 
         // Carga la configuracion de los bundles
-        $this->registerBundlesAndRoutes();
+        $this->registerBundles();
 
         // Carga la configuracion del proyecto
         Service::get('config')->loadConfigGlobal();
@@ -54,23 +55,29 @@ class Kernel extends HttpKernel
         parent::__construct(Service::get('event'), Service::get('kernel.resolver'));
     }
 
-    public function registerBundlesAndRoutes()
+    public function registerBundles()
     {
         $loader = $this->loader;
-        $namespaces = Service::getNamespacesBundles();
+        $bundles = Service::getBundles();
         $routes = Service::get('kernel.routes');
 
         // Carga todas las rutas de los bundles instalados.
-        foreach($namespaces as $namespace)
+        foreach($bundles as $bundle)
         {
-            // Registra el namespace del Bundle.
-            $loader->set($namespace, array(Ki_BUNDLES));
+            $namespace = $bundle->getNamespace();
+            $path = $bundle->getPath();
 
-            $file_routes = str_replace('\\', '/', Ki_BUNDLES.$namespace.'config/routes.cf.php' );
+            $loader->set($namespace, array($path));
 
-            if(is_file($file_routes))
+            $path_config = str_replace('\\', '/', $path.'/config/');
+
+            $finder = new Finder();
+            $finder->files()->name('*.cf.php')->in($path_config);
+
+            // Incluye todas los archivos para rutas que existan en el bundle
+            foreach($finder as $file)
             {
-                include $file_routes;
+                include $file->getRealpath();
             }
         }
 

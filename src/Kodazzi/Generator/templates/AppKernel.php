@@ -14,10 +14,10 @@ Class ##CLASS## ##EXTENDS##
 {
     public function start()
     {
-        Service::registerBundles(array(
-        <?php foreach($data['bundles'] as $namespace):?>
-        '<?php echo $namespace; ?>\\',
+        Service::registerBundles([
+        <?php foreach($data['bundles'] as $bundle):?>
+        new <?php echo $bundle; ?>\HookBundle(),
         <?php endforeach; ?>
-        ));
+        ]);
     }
 }

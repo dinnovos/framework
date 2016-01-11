@@ -123,7 +123,18 @@ Class BundleCommand extends Command
                 $GenerateClass->setTemplate('index');
                 $GenerateClass->create(Ki_BUNDLES . $namespace . '/views/home/index', array(), '.twig');
 
+                // Crea el HookBundle
+                $GenerateClass->setTemplate('HookBundle');
+                $GenerateClass->setValues( array(
+                    'namespace' => str_replace('/', '\\', $namespace)
+                ) );
+                $GenerateClass->create(Ki_BUNDLES . $namespace . '/HookBundle');
+
                 \Kodazzi\Tools\Util::bundle($namespace, 'new');
+
+                $output->writeln( PHP_EOL . 'El bundle ' . str_replace('/', '\\', $namespace) . ' ha sido creado con exito' . PHP_EOL );
+
+                exit;
 
 				break;
 
@@ -137,6 +148,8 @@ Class BundleCommand extends Command
                 }
 
                 \Kodazzi\Tools\Util::bundle($namespace, 'delete');
+
+                $output->writeln( PHP_EOL . 'El bundle ' . str_replace('/', '\\', $namespace) . ' ha sido eliminado con exito' . PHP_EOL );
 
 				break;
 		}

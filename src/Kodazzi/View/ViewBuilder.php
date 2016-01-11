@@ -46,7 +46,7 @@ Class ViewBuilder
         $this->Config = $config;
         $this->UrlGenerator = $url_generator;
 
-        $namespaces = Service::getNamespacesBundles();
+        $bundles = Service::getBundles();
 
         $theme_web = $config->get('app', 'theme_web');
         $theme_admin = $config->get('app', 'theme_admin');
@@ -80,9 +80,9 @@ Class ViewBuilder
             }
         }
 
-        foreach($namespaces as $namespace)
+        foreach($bundles as $bundle)
         {
-            $path_bundles_templates = str_replace('\\', '/', Ki_BUNDLES.$namespace.'templates' );
+            $path_bundles_templates = str_replace('\\', '/', $bundle->getPath().'/templates' );
 
             if(is_dir($path_bundles_templates))
             {

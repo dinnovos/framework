@@ -64,18 +64,18 @@ Class SchemaCommand extends Command
 			exit;
 		}
 
-        $bundles = Service::getNamespacesBundles();
+        $bundles = Service::getBundles();
 
         $_schema = array();
         $mirrors = array();
 
         foreach($bundles as $bundle)
         {
-            $dir_schema = str_replace('\\', '/', Ki_BUNDLES.$bundle.'config/schema');
+            $dir_schema = str_replace('\\', '/', $bundle->getPath().'/config/schema');
 
             if(is_dir($dir_schema))
             {
-                $mirrors[$bundle] = $bundle;
+                $mirrors[$bundle->getNameSpace()] = $bundle;
 
                 $finder = new Finder();
                 $finder->files()->name('*.yml')->in($dir_schema);
@@ -125,7 +125,7 @@ Class SchemaCommand extends Command
 
                 foreach($mirrors as $namespace => $mirror)
                 {
-                    $path_source = str_replace('\\', '/',Ki_BUNDLES.$namespace.'config/schema');
+                    $path_source = str_replace('\\', '/',Ki_BUNDLES.$namespace.'/config/schema');
 
                     // Hace un espejo desde el esquema del bundle al directorio temporal
                     $fs->mirror($path_source, $_path_schema_tmp.$namespace, null, array('override'=>true,'delete'=>true));

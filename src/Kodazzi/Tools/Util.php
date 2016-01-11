@@ -165,7 +165,7 @@ Class Util
     static function bundle($namespace, $action)
     {
         $namespace = str_replace('/', '\\', $namespace);
-        $bundles = \Service::getNamespacesBundles();
+        $bundles = \Service::getBundles();
 
         $namespace_slug = \Kodazzi\Tools\StringProcessor::slug($namespace);
         $bundles_activated = array();
@@ -178,8 +178,9 @@ Class Util
 
         foreach($bundles as $bundle)
         {
-            $bundle_slug = \Kodazzi\Tools\StringProcessor::slug($bundle);
-            $bundles_activated[$bundle_slug] = trim($bundle,'\\');
+            $bundle_slug = \Kodazzi\Tools\StringProcessor::slug($bundle->getNameSpace());
+
+            $bundles_activated[$bundle_slug] = trim($bundle->getNameSpace(),'\\');
         }
 
         if($action == 'new')

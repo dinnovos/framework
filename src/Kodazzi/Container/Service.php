@@ -102,7 +102,7 @@ Class Service
         self::$bundles = $bundles;
     }
 
-    public static function getNamespacesBundles()
+    public static function getBundles()
     {
         return self::$bundles;
     }
