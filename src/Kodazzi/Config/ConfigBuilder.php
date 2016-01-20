@@ -41,8 +41,10 @@ class ConfigBuilder implements ConfigBuilderInterface
             }
 		}
 
-		if ( $default == -1 )
-			throw new \Exception("No se encontr&oacute; la clave de configuraci&oacute;n <b>$key</b>");
+		if ( $default === -1 )
+        {
+            throw new \Exception("No se encontr&oacute; la clave de configuraci&oacute;n <b>$key</b>");
+        }
 
 		return $default;
 	}

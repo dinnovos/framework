@@ -16,7 +16,7 @@ use Kodazzi\Container\Service;
 Class Routing
 {
     private $name = null;
-    private $route = null;
+    private $paths = array();
     private $controler = null;
     private $default = array();
     private $requirements = array();
@@ -32,9 +32,14 @@ Class Routing
         return $this;
     }
 
-    public function path($route, $lang = 'es')
+    public function path($path, $lang = null)
     {
-        $this->route = $route;
+        if($lang && !preg_match('/^[a-z]{2}$/', $lang))
+        {
+            throw new \Exception( "The language in route {$this->name} is invalid." );
+        }
+
+        $this->paths[] = array('path' => $path, 'lang' => $lang);
 
         return $this;
     }
@@ -153,14 +158,29 @@ Class Routing
     public function ok()
     {
         $routes = Service::get('kernel.routes');
+        $paths = $this->paths;
 
-        $routes->add(
-            $this->name,
-            new Route( $this->route, $this->default, $this->requirements, $this->options, $this->host, $this->schemes, $this->methods )
-        );
+        foreach($paths as $path)
+        {
+            $name = $this->name;
+
+            if(!isset($this->default['controller']))
+                throw new \Exception( "En la ruta '$name'' debe agregar un controlador." );
+
+            if($path['lang'])
+            {
+                $this->options['_locale'] = $path['lang'];
+                $name .= "-{$path['lang']}";
+            }
+
+            $routes->add(
+                "$name",
+                new Route( $path['path'], $this->default, $this->requirements, $this->options, $this->host, $this->schemes, $this->methods )
+            );
+        }
 
         $this->name = null;
-        $this->route = null;
+        $this->paths = array();
         $this->controler = null;
         $this->default = array();
         $this->requirements = array();

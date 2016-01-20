@@ -98,8 +98,8 @@ Class ViewBuilder
 		));
 
 		// Funcion para construir las url
-		$build_url = new \Twig_SimpleFunction('build_url', function ( $name_route, $parameters = array() ) {
-			return \Kodazzi\Tools\Util::buildUrl( $name_route , $parameters );
+		$build_url = new \Twig_SimpleFunction('build_url', function ( $name_route, $parameters = array(), $locale = null ) {
+			return \Kodazzi\Tools\Util::buildUrl( $name_route , $parameters, $locale );
 		});
 
         // Funcion para construir las url

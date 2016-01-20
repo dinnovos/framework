@@ -14,6 +14,7 @@ namespace Kodazzi;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ControllerResolverInterface;
+use Kodazzi\Container\Service;
 
 class ControllerResolver implements ControllerResolverInterface
 {

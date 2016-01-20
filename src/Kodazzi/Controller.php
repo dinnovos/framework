@@ -50,6 +50,11 @@ Class Controller
         return null;
     }
 
+    public function setLocale($locale)
+    {
+        $this->getSession()->setLocale($locale);
+    }
+
    /**
     * @return SessionBuilder
     */
@@ -189,9 +194,9 @@ Class Controller
         return new Response($this->getView()->render($template, $data));
     }
 
-    public function buildUrl($route, $parameters = array())
+    public function buildUrl($route, $parameters = array(), $locale = null)
     {
-        return \Kodazzi\Tools\Util::buildUrl($route, $parameters);
+        return \Kodazzi\Tools\Util::buildUrl($route, $parameters, $locale);
     }
 
     public function redirectResponse( $url, $status = 302 )

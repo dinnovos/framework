@@ -39,7 +39,7 @@ class Kernel extends HttpKernel
         Service::get('config')->loadConfigGlobal();
 
         // Carga la clase translator
-        Service::get('translator')->loader(Service::get('config')->get('app', 'local'));
+        Service::get('translator')->loader(Service::get('session')->getLocale());
 
         $this->registerProviders();
 

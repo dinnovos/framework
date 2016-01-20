@@ -71,6 +71,10 @@ Service::set('listener.controller', function(){
     return new Kodazzi\Listeners\ControllerListener();
 });
 
+Service::set('listener.locale', function(){
+    return new Kodazzi\Listeners\LocaleListener();
+});
+
 Service::set('listener.subrequest', function(){
     return new Kodazzi\Listeners\SubRequestListener();
 });
@@ -179,6 +183,10 @@ Service::factory('command.bundle', function(){
     return new Kodazzi\Console\Commands\BundleCommand();
 });
 
+Service::factory('command.routes', function(){
+    return new Kodazzi\Console\Commands\RoutesCommand();
+});
+
 Service::set('shell', function(){
     return new Kodazzi\Console\Shell();
 });
@@ -195,6 +203,7 @@ $dispatcher = Service::get('event');
 $dispatcher->addSubscriber(Service::get('listener.router'));
 $dispatcher->addSubscriber(Service::get('listener.firewall'));
 $dispatcher->addSubscriber(Service::get('listener.controller'));
+$dispatcher->addSubscriber(Service::get('listener.locale'));
 $dispatcher->addSubscriber(Service::get('listener.response'));
 $dispatcher->addSubscriber(Service::get('listener.subrequest'));
 $dispatcher->addSubscriber(Service::get('listener.postaction'));

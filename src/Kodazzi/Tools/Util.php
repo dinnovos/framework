@@ -16,6 +16,8 @@
 
 namespace Kodazzi\Tools;
 
+use Kodazzi\Container\Service;
+
 Class Util
 {
 	static function clearMagicQuotes()
@@ -146,9 +148,9 @@ Class Util
 		return false;
 	}
 
-    static public function buildUrl($route, $parameters = array())
+    static public function buildUrl($name, $parameters = array(), $locale = null)
     {
-        if($route == '@default' || preg_match('/^(\@default)/', $route))
+        if($name == '@default' || preg_match('/^(\@default)/', $name))
         {
             foreach($parameters as $key => $parameter)
             {
@@ -159,7 +161,25 @@ Class Util
             }
         }
 
-        return \Service::get('kernel.url_generator')->generate( $route, $parameters);
+        // Forza la url para generarla desde una lenguaje especifico
+        if($locale)
+        {
+            $name = "{$name}-{$locale}";
+        }
+        else
+        {
+            $locale = ($locale) ? $locale : Service::get('session')->getLocale();
+
+            // Primero intenta encontrar la ruta concatenada con el lenguaje actual
+            $Route = Service::get('kernel.routes')->get("{$name}-{$locale}");
+
+            if($Route)
+            {
+                $name = "{$name}-{$locale}";
+            }
+        }
+
+        return Service::get('kernel.url_generator')->generate($name, $parameters);
     }
 
     static function bundle($namespace, $action)
