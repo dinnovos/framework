@@ -156,9 +156,9 @@ Service::set('generate_class', function(){
     return new Kodazzi\Generator\GenerateClass();
 });
 
-Service::factory('db', function($opt){
+Service::factory('active.record', function($opt){
     // El parametro debe ser una cadena.
-    return new Kodazzi\Orm\Db((is_string($opt))?$opt:'default');
+    return new Kodazzi\Orm\ActiveRecord((is_string($opt))?$opt:'default');
 });
 
 // ---------- Commands

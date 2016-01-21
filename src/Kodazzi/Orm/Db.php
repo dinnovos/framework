@@ -20,18 +20,22 @@ use Kodazzi\Config\ConfigBuilderInterface;
 class Db
 {
 	protected $driver = null;
-	protected $join_object = array();
-
 	protected $namespace = null;
+    protected $alias = null;
+    protected $table = null;
+    protected $primary = null;
+    protected $instance_model = null;
+    protected $title = null;
+
+    protected $where = array();
+
+
+
 	protected $join_namespaces = array();
-	protected $instance_model = null;
-	protected $table = null;
-	protected $primary = null;
-	protected $title = null;
 	protected $identifier = null;
 	protected $has_definition_relation = false;
     protected $QueryBuilder = null;
-    protected $alias = null;
+
 
 	private $conn = null;
 
@@ -79,18 +83,26 @@ class Db
 
     public function model($namespace = null, $alias = 'a')
     {
+        if($namespace && strpos($namespace, ':'))
+        {
+            $p = explode(':', $namespace);
+
+            $namespace = "{$p[0]}\\Models\\{$p[1]}Model";
+        }
+
         if($namespace)
         {
             $this->namespace = $namespace;
 
             $this->alias = $alias;
 
-            $this->_setPropertiesInstance( new $namespace() );
+            $this->setPropertiesInstance( new $namespace() );
         }
 
         return $this;
     }
 
+    /*
     public function join($namespace, $alias, $fromAlias = 'a')
     {
         $this->join_namespaces[$namespace] = array_merge(array('type' => 'join'), $this->_join($namespace, $alias, $fromAlias));
@@ -147,6 +159,7 @@ class Db
 
         return $this;
     }
+    */
 
     /**
 	 * @return \Doctrine\DBAL\Connection
@@ -184,55 +197,10 @@ class Db
 		return $this->conn->update( $this->table, $data, $where );
 	}
 
-	public function fetch( array $where = array(), $fields = '*', $typeFetch = \PDO::FETCH_CLASS, $order = null )
-	{
-		$queryBuilder = $this->_buildQuery( $where, $fields, $order );
-
-		//$queryBuilder->execute()->fetch();
-
-		if( $typeFetch == \PDO::FETCH_ASSOC )
-		{
-			return $queryBuilder->execute()->fetch();
-		}
-
-		return $queryBuilder->execute()->fetchObject($this->namespace);
-	}
-
-	public function fetchAll(array $where = array(), $fields = '*', $typeFetch = \PDO::FETCH_CLASS, $order = null)
-	{
-		$queryBuilder = $this->_buildQuery($where, $fields, $order);
-
-		if($typeFetch == \PDO::FETCH_ASSOC)
-		{
-			return $queryBuilder->execute()->fetchAll();
-		}
-
-		return $queryBuilder->execute()->fetchAll(\PDO::FETCH_CLASS, $this->namespace);
-	}
-
-	public function fetchForOptions($where = array(), $fields = null)
-	{
-		$data = array();
-		$fields = ($fields === null) ? "a.{$this->primary}, a.{$this->title}" : $fields;
-
-		$queryBuilder = $this->_buildQuery($where, $fields);
-
-		$rows = $queryBuilder->execute()->fetchAll();
-
-		foreach( $rows as $row )
-		{
-			$key = current($row);
-			$value = next($row);
-
-			$data[$key] = $value;
-		}
-
-		return $data;
-	}
-
+    /*
     public function fetchWithTranslation($lang = null, array $where = array(), $fields = '*',  $order = null)
     {
-        $queryBuilder = $this->_buildQuery($where, $fields, $order);
+        $queryBuilder = $this->buildQuery($where, $fields, $order);
         $instance = $this->instance_model;
         $primary = $instance::primary;
 
@@ -338,7 +306,7 @@ class Db
 			$data[$field] = $instance->$field;
 		}
 
-		/* Se verifica si el modelo tiene el metodo getFieldsSluggable */
+		// Se verifica si el modelo tiene el metodo getFieldsSluggable
 		if($rF->hasMethod('getFieldsSluggable'))
 		{
             // Si en la data existe un campo slug se utiliza en lugar de crearlo
@@ -360,7 +328,7 @@ class Db
             }
 		}
 
-		/* Verifica si el campo primary existe y contiene algun valor */
+		// Verifica si el campo primary existe y contiene algun valor
 		if(array_key_exists($primary, $data) && $data[$primary] )
 		{
 			unset($data[$primary]);
@@ -401,18 +369,44 @@ class Db
 
 		return ( $result ) ? true: false;
 	}
+    */
 
 	/**************************************************************************************************************/
 
-	private function _buildQuery($where = array(), $fields = '*', $order = array())
+	protected function buildQuery($_where = array(), $fields = '*', $order = array())
 	{
         $alias = $this->alias;
 		$queryBuilder = $this->getQueryBuilder();
 		$queryBuilder->select($fields);
 		$queryBuilder->from($this->table, $alias);
-        $join_namespaces = $this->join_namespaces;
+        $where = $this->where;
+
+        //$join_namespaces = $this->join_namespaces;
+
+        foreach($where as $condition)
+        {
+            if($condition[2] === null)
+            {
+                $queryBuilder->andWhere("{$condition[0]} IS NULL");
+            }
+            else
+            {
+                $_field = str_replace('.', '', $condition[0]);
+
+                $queryBuilder->andWhere("{$condition[0]}{$condition[1]}:$_field");
+                $queryBuilder->setParameter(":$_field", $condition[2]);
+            }
+        }
+
+        /*
+        if(is_int($where))
+        {
+            $_where = array($this->primary => $where);
+        }
+        */
 
         // Verifica los joins
+        /*
         if(is_array($join_namespaces) && count($join_namespaces))
         {
             foreach($join_namespaces as $join_namespace => $join_options)
@@ -436,7 +430,8 @@ class Db
             }
         }
 
-		foreach($where as $field => $value)
+
+		foreach($_where as $field => $value)
 		{
 			if($value === null)
 			{
@@ -450,6 +445,7 @@ class Db
 				$queryBuilder->setParameter(":$_field", $value);
 			}
 		}
+        */
 
 		if($order)
 		{
@@ -461,6 +457,7 @@ class Db
 		return $queryBuilder;
 	}
 
+    /*
     private function _join($namespace, $alias, $fromAlias)
     {
         $definition_relations = array();
@@ -509,8 +506,9 @@ class Db
 
         return $join;
     }
+    */
 
-	private function _setPropertiesInstance($instance)
+	protected function setPropertiesInstance($instance)
 	{
 		$ReflectionObject = new \ReflectionObject($instance);
 

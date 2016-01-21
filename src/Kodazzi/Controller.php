@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Kodazzi\Config\ConfigBuilder;
 use Kodazzi\EventDispatcher\Event;
-use Kodazzi\Orm\Db;
+use Kodazzi\Orm\ActiveRecord;
 use Kodazzi\Form\FormBuilder;
 use Kodazzi\Session\SessionBuilder;
 use Kodazzi\Translator\TranstalorBuilder;
@@ -89,11 +89,19 @@ Class Controller
     }
 
     /**
-     * @return Db
+     * @return ActiveRecord
      */
     public function getDB()
     {
-        return Service::get('db');
+        return Service::get('active.record');
+    }
+
+    /**
+     * @return ActiveRecord
+     */
+    public function model($namespace, $alias = 'a')
+    {
+        return Service::get('active.record')->model($namespace, $alias);
     }
 
     /**
