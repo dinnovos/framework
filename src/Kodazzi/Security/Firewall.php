@@ -15,6 +15,8 @@ use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpFoundation\RequestMatcher;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Kodazzi\Config\ConfigBuilderInterface;
 use Kodazzi\Security\Card\CardManager;
 use Kodazzi\Security\Card\CardInterface;
@@ -65,8 +67,14 @@ class Firewall implements EventSubscriberInterface
                         // Detiene la propagacion del evento
                         $event->stopPropagation();
 
-                        // Envia la respuesta
-                        $event->setResponse(new redirectResponse(Util::buildUrl($rule['forbidden_route'])));
+                        if($request->isXmlHttpRequest())
+                        {
+                            $event->setResponse(new JsonResponse(array('status'=> 'forbidden')), Response::HTTP_FORBIDDEN);
+                        }
+                        else
+                        {
+                            $event->setResponse(new redirectResponse(Util::buildUrl($rule['forbidden_route'])));
+                        }
 
                         return;
                     }
@@ -75,7 +83,14 @@ class Firewall implements EventSubscriberInterface
                 {
                     $event->stopPropagation();
 
-                    $event->setResponse(new redirectResponse(Util::buildUrl($rule['login_route'])));
+                    if($request->isXmlHttpRequest())
+                    {
+                        $event->setResponse(new JsonResponse(array('status'=> 'forbidden')), Response::HTTP_FORBIDDEN);
+                    }
+                    else
+                    {
+                        $event->setResponse(new redirectResponse(Util::buildUrl($rule['login_route'])));
+                    }
 
                     return;
                 }
