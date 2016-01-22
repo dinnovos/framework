@@ -27,19 +27,34 @@ class Db
     protected $instance_model = null;
     protected $title = null;
 
-    protected $where = array();
+    protected $fields = '*';
 
+    /*
+    protected $where = array();
+    protected $or_where = array();
+    protected $where_in = array();
+    protected $or_where_in = array();
+    protected $order_by = array();
+
+    protected $group_by = null;
+    protected $having = null;
+    */
+
+    protected $Config = null;
+
+    /**
+     * @var QueryBuilder
+     */
+    protected $QueryBuilder = null;
 
 
 	protected $join_namespaces = array();
 	protected $identifier = null;
 	protected $has_definition_relation = false;
-    protected $QueryBuilder = null;
-
 
 	private $conn = null;
 
-    protected $Config = null;
+
 
     public function __construct($connection = 'default')
     {
@@ -77,6 +92,8 @@ class Db
         {
             throw new \Exception("El <b>Driver</b> para la conexi&oacute;n a la base de datos no es v&aacute;lido.");
         }
+
+        $this->QueryBuilder = $this->getQueryBuilder();
 
         return $this;
     }
@@ -177,6 +194,7 @@ class Db
 		return ($this->QueryBuilder) ? $this->QueryBuilder : $this->QueryBuilder = $this->conn->createQueryBuilder();
 	}
 
+    /*
 	public function getIdentifier()
 	{
 		return ($this->conn->lastInsertId()) ? $this->conn->lastInsertId() : $this->identifier;
@@ -197,7 +215,6 @@ class Db
 		return $this->conn->update( $this->table, $data, $where );
 	}
 
-    /*
     public function fetchWithTranslation($lang = null, array $where = array(), $fields = '*',  $order = null)
     {
         $queryBuilder = $this->buildQuery($where, $fields, $order);
@@ -373,32 +390,174 @@ class Db
 
 	/**************************************************************************************************************/
 
-	protected function buildQuery($_where = array(), $fields = '*', $order = array())
+    protected function buildWhere($condition, $operator, $value, $method)
+    {
+        $method = strtoupper($method);
+
+        if($operator && !in_array($operator, array('=', '<', '>', '<>', '>=', '<=')))
+        {
+            throw new \Exception( 'El operador "'.$operator.'" en el metodo "where" no es valido.' );
+        }
+
+        if($operator !== null && $value !== null)
+        {
+            $field = str_replace('.', '', $condition);
+            $condition = "{$condition}{$operator}:$field";
+
+            $this->QueryBuilder->setParameter(":$field", $value);
+        }
+
+        if($method == 'WHERE')
+        {
+            $this->QueryBuilder->where($condition);
+        }
+        else if($method == 'AND_WHERE')
+        {
+            $this->QueryBuilder->andWhere($condition);
+        }
+        else if($method == 'OR_WHERE')
+        {
+            $this->QueryBuilder->orWhere($condition);
+        }
+    }
+
+    public function buildJoin($namespace, $alias, $type_join)
+    {
+        $type_join = strtoupper($type_join);
+
+        if($namespace && strpos($namespace, ':'))
+        {
+            $p = explode(':', $namespace);
+
+            $namespace = "{$p[0]}\\Models\\{$p[1]}Model";
+            $instance = new $namespace();
+
+            $relations = $this->instance_model->getDefinitionRelations();
+
+            if(array_key_exists($namespace, $relations))
+            {
+                $this->QueryBuilder->from($this->table, $this->alias);
+
+                if($type_join == 'INNER_JOIN')
+                {
+                    $this->QueryBuilder->innerJoin($this->alias, $instance::table, $alias, "{$alias}.".$instance::primary." = {$this->alias}.{$relations[$namespace]['fieldLocal']}");
+                }
+                else if($type_join == 'LEFT_JOIN')
+                {
+                    $this->QueryBuilder->leftJoin($this->alias, $instance::table, $alias, "{$alias}.".$instance::primary." = {$this->alias}.{$relations[$namespace]['fieldLocal']}");
+                }
+                else if($type_join == 'RIGHT_JOIN')
+                {
+                    $this->QueryBuilder->rightJoin($this->alias, $instance::table, $alias, "{$alias}.".$instance::primary." = {$this->alias}.{$relations[$namespace]['fieldLocal']}");
+                }
+            }
+        }
+    }
+
+	protected function buildQuery($id = null)
 	{
         $alias = $this->alias;
-		$queryBuilder = $this->getQueryBuilder();
-		$queryBuilder->select($fields);
-		$queryBuilder->from($this->table, $alias);
-        $where = $this->where;
+		$QueryBuilder = $this->QueryBuilder;
 
-        //$join_namespaces = $this->join_namespaces;
+        if(count($QueryBuilder->getQueryPart('select')) == 0)
+        {
+            $QueryBuilder->select($this->fields);
+        }
+
+        if(count($QueryBuilder->getQueryPart('from')) == 0)
+        {
+            $QueryBuilder->from($this->table, $alias);
+        }
+
+
+        if($id)
+        {
+            $QueryBuilder->andWhere("{$alias}.{$this->primary} = :id");
+            $QueryBuilder->setParameter(':id', $id);
+        }
+
+        return $QueryBuilder;
+
+        /*
+        $where = $this->where;
+        $or_where = $this->or_where;
+        $where_in = $this->where_in;
+        $or_where_in = $this->where_in;
 
         foreach($where as $condition)
         {
-            if($condition[2] === null)
+            if(is_string($condition))
             {
-                $queryBuilder->andWhere("{$condition[0]} IS NULL");
+                $queryBuilder->andWhere($condition);
             }
-            else
+            else if(is_array($condition))
             {
-                $_field = str_replace('.', '', $condition[0]);
+                if($condition[2] === null)
+                {
+                    $queryBuilder->andWhere("{$condition[0]} IS NULL");
+                }
+                else
+                {
+                    $_field = str_replace('.', '', $condition[0]);
 
-                $queryBuilder->andWhere("{$condition[0]}{$condition[1]}:$_field");
-                $queryBuilder->setParameter(":$_field", $condition[2]);
+                    $queryBuilder->andWhere("{$condition[0]}{$condition[1]}:$_field");
+                    $queryBuilder->setParameter(":$_field", $condition[2]);
+                }
             }
         }
 
-        /*
+        foreach($or_where as $condition)
+        {
+            if(is_string($condition))
+            {
+                $queryBuilder->orWhere($condition);
+            }
+            else if(is_array($condition))
+            {
+                if($condition[2] === null)
+                {
+                    $queryBuilder->orWhere("{$condition[0]} IS NULL");
+                }
+                else
+                {
+                    $_field = str_replace('.', '', $condition[0]);
+
+                    $queryBuilder->orWhere("{$condition[0]}{$condition[1]}:$_field");
+                    $queryBuilder->setParameter(":$_field", $condition[2]);
+                }
+            }
+        }
+
+        foreach($where_in  as $condition)
+        {
+            $queryBuilder->andWhere( $queryBuilder->expr()->andX($queryBuilder->expr()->in($condition[0], $condition[1])) );
+        }
+
+        foreach($or_where_in  as $condition)
+        {
+            $queryBuilder->orWhere( $queryBuilder->expr()->orX($queryBuilder->expr()->in($condition[0], $condition[1])) );
+        }
+
+        if(count($this->order_by))
+        {
+            $queryBuilder->orderBy($this->order_by[0], $this->order_by[1]);
+        }
+
+        if($this->group_by)
+        {
+            $queryBuilder->groupBy($this->group_by);
+        }
+
+        if($this->having)
+        {
+            $queryBuilder->andHaving($this->having);
+        }
+
+        echo "<pre>";
+        var_dump($queryBuilder->getSQL());
+        echo "</pre>";
+        exit;
+
         if(is_int($where))
         {
             $_where = array($this->primary => $where);
@@ -445,7 +604,7 @@ class Db
 				$queryBuilder->setParameter(":$_field", $value);
 			}
 		}
-        */
+
 
 		if($order)
 		{
@@ -454,7 +613,7 @@ class Db
 			$queryBuilder->orderBy("$_f", $_v);
 		}
 
-		return $queryBuilder;
+        */
 	}
 
     /*
