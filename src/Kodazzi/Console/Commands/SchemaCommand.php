@@ -149,7 +149,11 @@ Class SchemaCommand extends Command
 	private function createSchema( $input, $output, $path_schema, $schema, $behavior )
 	{
 		$GenerateClass = Service::get('generate_class');
-        $prefix = Service::get('config')->get('db', 'prefix', '');
+        $connectionOptions = (Ki_ENVIRONMENT == 'prod') ? Service::get('config')->get('db', 'prod') :  Service::get('config')->get('db', 'dev') ;
+        $connectionOptions = (array_key_exists('default', $connectionOptions)) ? $connectionOptions['default'] : current($connectionOptions);
+
+        $prefix = (array_key_exists('prefix', $connectionOptions)) ? $connectionOptions['prefix'] : '';
+
         $helper = $this->getHelper('question');
 		$fs = new Filesystem();
 		$dateTime = new \DateTime();
@@ -193,7 +197,7 @@ Class SchemaCommand extends Command
 		$schema = include $path_schema.'current/schema.php';
 
 		// Se crea el archivo .sql que contendra la estructura del esquema para la base de datos.
-		$querys = $schema->toSql(Service::get('db')->getDriverManager()->getDatabasePlatform());
+		$querys = $schema->toSql(Service::get('database.manager')->getConnectionManager()->getConnection()->getDatabasePlatform());
 
 		$sql = "";
 		foreach( $querys as $query )

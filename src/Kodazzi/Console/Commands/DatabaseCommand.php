@@ -22,6 +22,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Filesystem\Filesystem;
+use Kodazzi\Container\Service;
 
 Class DatabaseCommand extends Command
 {
@@ -89,7 +90,7 @@ Class DatabaseCommand extends Command
 			return;
 		}
 
-        $DriverManager = \Db::model()->getDriverManager();
+        $DriverManager = Service::get('database.manager')->getConnectionManager()->getConnection();
         $sm = $DriverManager->getSchemaManager();
 
         // Obtiene el esquema de la base de datos.

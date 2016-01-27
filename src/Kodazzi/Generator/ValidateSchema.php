@@ -32,12 +32,14 @@ Class ValidateSchema
         $fields_translation = array();
         $sluggable_translation = null;
 
-		if (!$this->is_valid)
+		if (! $this->is_valid)
 		{
 			return false;
 		}
 
-		/* Recorre las tablas */
+		/**
+         * Recorre las tablas
+         */
 		foreach ($this->schema as $table => $values)
 		{
 			if (isset($values['options']))
@@ -151,32 +153,33 @@ Class ValidateSchema
 	private function isValidRelation($table, $field, $options)
 	{
 		$schema = $this->schema;
-		/*
+
+		/**
 		 * model, es requerido.
 		 */
-		if (!isset($options['model']))
+		if (! isset($options['model']))
 		{
 			$this->is_valid = false;
 			$this->errors[] = '- Tabla ' . ucfirst($table) . ': En el campo "' . $field . '", el parametro "model" es requerido.';
 
 			return;
 		}
-		
-		/*
+
+		/**
 		 * model, es requerido.
 		 */
-		if (!isset($options['relation']))
+		if (! isset($options['relation']))
 		{
 			$this->is_valid = false;
 			$this->errors[] = '- Tabla ' . ucfirst($table) . ': En el campo "' . $field . '", el parametro "relation" es requerido.';
 
 			return;
 		}
-		
-		/*
+
+		/**
 		 * Se verifica que model haga referencia a una tabla existente en el esquema.
 		 */
-		if (!array_key_exists($options['model'], $schema))
+		if (! array_key_exists($options['model'], $schema))
 		{
 			$this->is_valid = false;
 			$this->errors[] = '- Tabla ' . ucfirst($table) . ': En el campo "' . $field . '", el parametro "model" hace referencia a una tabla "' . $options['model'] . '" que no existe en el esquema.';
@@ -191,8 +194,7 @@ Class ValidateSchema
 			case 'one-to-many':
 			case 'many-to-one-self-referencing':
 
-				/* El parametro model debe ser diferente a la misma */
-				
+				// El parametro model debe ser diferente a la misma
 				if($options['relation'] == 'many-to-one-self-referencing')
 				{
 					if($table != $options['model'])
@@ -239,7 +241,7 @@ Class ValidateSchema
 			case 'many-to-many':
 			case 'many-to-many-self-referencing':
 
-				/* El parametro model debe ser diferente a la misma */
+				// El parametro model debe ser diferente a la misma
 				if($options['relation'] == 'many-to-many' && $table == $options['model'])
 				{
 					$this->is_valid = false;
@@ -314,13 +316,13 @@ Class ValidateSchema
 		}
 	}
 
-	/*
+	/**
 	 * Verifica las opciones de la tabla
 	 */
 	private function tableOptionsIsValid($table, $options)
 	{
 		/* table */
-		if (!isset($options['table']) || $options['table'] == '')
+		if (! isset($options['table']) || $options['table'] == '')
 		{
 			$this->is_valid = false;
 			$this->errors[] = '- Table ' . ucfirst($table) . ': No se existe parametro "table" dentro de "options" o se encuentra vacio.';
@@ -500,10 +502,9 @@ Class ValidateSchema
 		}
 	}
 
-	/*
+	/**
 	 * Permite obtener los parametros de los tipos extendidos en cascada
 	 */
-
 	private function getParametersExtend($type_extend, $definition_fields, $_parameters, $type)
 	{
 		if (isset($definition_fields[$type_extend]))

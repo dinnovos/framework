@@ -14,12 +14,19 @@ Class StringProcessor
 {
 	public static function slug( $string )
 	{
+        $string = html_entity_decode($string, ENT_COMPAT, 'UTF-8');
+
         $string = self::replaceVowels($string);
 
         $string = preg_replace('/[^a-zA-Z0-9\_\-\.]+/', '-', strtolower($string));
         $string = trim($string, '-');
         $string = trim($string, '_');
         $string = trim($string, '.');
+
+        if(substr($string, strlen($string) - 1, strlen($string)) === "-")
+        {
+            $string = substr($string, 0, strlen($string) - 1);
+        }
 
 		return $string;
 	}

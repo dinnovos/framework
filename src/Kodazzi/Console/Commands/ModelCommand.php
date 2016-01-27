@@ -127,22 +127,28 @@ Class ModelCommand extends Command
 
 	public function generateModels( $input, $output, $schema, $bundle )
 	{
-		$GenerateClass = Service::get( 'generate_class' );
-        $prefix = Service::get('config')->get('db', 'prefix', '');
+		$GenerateClass = Service::get('generate_class');
 
 		$output->write( PHP_EOL . "Lista de clases para el modelo:" . PHP_EOL );
 
 		$this->mkdir( Ki_BUNDLES . $bundle . '/Models/Base/' );
 
-		foreach ( $schema as $table => $options )
-		{
-			if( !is_file(Ki_BUNDLES . $bundle . '/Models/' . ucfirst( $table ).'Model.php') )
+		foreach($schema as $table => $options)
+        {
+            if(strpos($table, ':'))
+            {
+                $p = explode(':', $table);
+
+                $table = $p[1];
+            }
+
+			if(! is_file(Ki_BUNDLES . $bundle . '/Models/' . ucfirst( $table ).'Model.php') )
 			{
-				$GenerateClass->setTemplate( 'Model' );
-				$GenerateClass->setNameClass( ucfirst($table).'Model' );
-				$GenerateClass->setNamespace( ucfirst( str_replace('/', '\\', $bundle) ) . '\Models' );
+				$GenerateClass->setTemplate('Model');
+				$GenerateClass->setNameClass(ucfirst($table).'Model');
+				$GenerateClass->setNamespace(ucfirst( str_replace('/', '\\', $bundle) ) . '\Models');
 				$GenerateClass->setNameClassExtend( 'Base\\'.ucfirst($table).'ModelBase' );
-				$GenerateClass->create( Ki_BUNDLES . $bundle . '/Models/' . ucfirst( $table ).'Model', $options );
+				$GenerateClass->create(Ki_BUNDLES . $bundle . '/Models/' . ucfirst( $table ).'Model', $options);
 
 				$output->write( " - Clase Model $table del Bundle $bundle, fue creada correctamente." . PHP_EOL );
 			}
@@ -152,9 +158,8 @@ Class ModelCommand extends Command
 			$GenerateClass->setNameClass( ucfirst($table).'ModelBase' );
 			$GenerateClass->setNamespace( ucfirst( str_replace('/', '\\', $bundle) ) . '\Models\Base' );
             $GenerateClass->setValues( array(
-                'namespace_base_model' => ucfirst( $bundle ) . '\Models\\',
-                '_prefix'   => $prefix,
-                'model'     => $table
+                'namespace_bundle' => ucfirst(str_replace('/', '\\', $bundle)),
+                'model'     => ucfirst($table)
             ) );
 
 			$GenerateClass->create( Ki_BUNDLES . $bundle . '/Models/Base/' . ucfirst( $table ).'ModelBase', $options );

@@ -156,9 +156,19 @@ Service::set('generate_class', function(){
     return new Kodazzi\Generator\GenerateClass();
 });
 
-Service::factory('active.record', function($opt){
+Service::factory('connection.manager', function(){
     // El parametro debe ser una cadena.
-    return new Kodazzi\Orm\ActiveRecord((is_string($opt))?$opt:'default');
+    return new Kodazzi\Orm\ConnectionManager(Service::get('config'));
+});
+
+Service::factory('model', function(){
+    // El parametro debe ser una cadena.
+    return new Kodazzi\Orm\Model();
+});
+
+Service::factory('database.manager', function(){
+    // El parametro debe ser una cadena.
+    return new Kodazzi\Orm\DatabaseManager(Service::get('config'), Service::get('connection.manager'), Service::get('model'));
 });
 
 // ---------- Commands

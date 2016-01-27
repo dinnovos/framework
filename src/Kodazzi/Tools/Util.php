@@ -229,4 +229,30 @@ Class Util
             $fs->remove(Ki_BUNDLES.str_replace('\\', '/', $namespace));
         }
     }
+
+    static function getShortNamespaceModel($namespace)
+    {
+        $namespace = str_replace('\Models\\', ':', $namespace);
+        $namespace = trim($namespace, 'Model');
+
+        return $namespace;
+    }
+
+    static function getNamespaceModel($shortNamespace)
+    {
+        if(strpos($shortNamespace, ':'))
+        {
+            $p = explode(':', $shortNamespace);
+            $p[1] = ucfirst($p[1]);
+
+            if(count($p) > 2)
+            {
+                throw new \Exception("El formato '{$shortNamespace}' para el modelo no es valido.");
+            }
+
+            return "{$p[0]}\\Models\\{$p[1]}Model";
+        }
+
+        throw new \Exception("El formato '{$shortNamespace}' para el modelo no es valido.");
+    }
 }
