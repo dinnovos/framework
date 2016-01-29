@@ -76,9 +76,6 @@ class Kernel extends HttpKernel
                 include $file->getRealpath();
             }
         }
-
-        // Rutas Globales
-        include Ki_APP.'config/routes.cf.php';
     }
 
     public function registerProviders()
