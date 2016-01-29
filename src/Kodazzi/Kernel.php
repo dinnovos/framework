@@ -2,7 +2,7 @@
  /**
  * This file is part of the Kodazzi Framework.
  *
- * (c) Jorge Gaitan <jgaitan@kodazzi.com>
+ * (c) Jorge Gaitan <info@kodazzi.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -12,6 +12,7 @@ namespace Kodazzi;
 
 use Service;
 use Symfony\Component\HttpKernel\HttpKernel;
+use Symfony\Component\Finder\Finder;
 
 class Kernel extends HttpKernel
 {
@@ -23,28 +24,28 @@ class Kernel extends HttpKernel
     {
         $this->loader = Service::get('kernel.loader');
 
-        if (!in_array(YS_ENVIRONMENT, array('dev', 'prod', 'shell')))
+        if (!in_array(Ki_ENVIRONMENT, array('dev', 'prod', 'shell')))
         {
-            throw new \Exception("El entorno \"".YS_ENVIRONMENT."\" no est&aacute; permitido");
+            throw new \Exception("El entorno \"".Ki_ENVIRONMENT."\" no est&aacute; permitido");
         }
 
         // Metodo de carga inicial
         $this->start();
 
         // Carga la configuracion de los bundles
-        $this->registerBundlesAndRoutes();
+        $this->registerBundles();
 
         // Carga la configuracion del proyecto
         Service::get('config')->loadConfigGlobal();
 
         // Carga la clase translator
-        Service::get('translator')->loader(Service::get('config')->get('app', 'local'));
+        Service::get('translator')->loader(Service::get('session')->getLocale());
 
         $this->registerProviders();
 
         $this->registerListeners();
 
-        if (YS_ENVIRONMENT == 'shell')
+        if (Ki_ENVIRONMENT == 'shell')
         {
             Service::get('shell')->console();
 
@@ -54,28 +55,30 @@ class Kernel extends HttpKernel
         parent::__construct(Service::get('event'), Service::get('kernel.resolver'));
     }
 
-    public function registerBundlesAndRoutes()
+    public function registerBundles()
     {
         $loader = $this->loader;
-        $namespaces = Service::getNamespacesBundles();
+        $bundles = Service::getBundles();
         $routes = Service::get('kernel.routes');
 
         // Carga todas las rutas de los bundles instalados.
-        foreach($namespaces as $namespace)
+        foreach($bundles as $bundle)
         {
-            // Registra el namespace del Bundle.
-            $loader->set($namespace, array(YS_BUNDLES));
+            $path = $bundle->getPath();
+            $path_config = str_replace('\\', '/', $path.'/config/');
 
-            $file_routes = str_replace('\\', '/', YS_BUNDLES.$namespace.'config/routes.cf.php' );
+            $finder = new Finder();
+            $finder->files()->name('*.cf.php')->in($path_config);
 
-            if(is_file($file_routes))
+            // Incluye todas los archivos para rutas que existan en el bundle
+            foreach($finder as $file)
             {
-                include $file_routes;
+                include $file->getRealpath();
             }
         }
 
         // Rutas Globales
-        include YS_APP.'config/routes.cf.php';
+        include Ki_APP.'config/routes.cf.php';
     }
 
     public function registerProviders()
@@ -90,6 +93,6 @@ class Kernel extends HttpKernel
 
     public function registerListeners()
     {
-        include YS_APP.'config/listeners.cf.php';
+        include Ki_APP.'config/listeners.cf.php';
     }
 }

@@ -10,7 +10,7 @@
 
 namespace Kodazzi\Facade;
 
-class Db extends Facade
+class Routing extends Facade
 {
 
     /**
@@ -18,6 +18,5 @@ class Db extends Facade
      *
      * @return string
      */
-    protected static function getName() { return 'db'; }
-
+    protected static function getName() { return 'routing'; }
 }

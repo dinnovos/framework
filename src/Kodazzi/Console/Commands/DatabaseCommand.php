@@ -2,7 +2,7 @@
 /**
  * This file is part of the Kodazzi Framework.
  *
- * (c) Jorge Gaitan <jgaitan@kodazzi.com>
+ * (c) Jorge Gaitan <info@kodazzi.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -22,6 +22,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Filesystem\Filesystem;
+use Kodazzi\Container\Service;
 
 Class DatabaseCommand extends Command
 {
@@ -42,7 +43,7 @@ Class DatabaseCommand extends Command
         $version = $input->getArgument('version');
         $helper = $this->getHelper('question');
 
-        $path_schema = YS_APP . 'src/storage/schemas/';
+        $path_schema = Ki_APP . 'src/storage/schemas/';
 
         if($version === null)
         {
@@ -68,7 +69,7 @@ Class DatabaseCommand extends Command
 
 		if( !is_dir( $path_schema . $version ) )
 		{
-			$output->writeln( PHP_EOL . " <error>No se encontro el esquema dentro del directorio: ".YS_SYSTEM."app/src/storage/schemas/{$version}</error>" . PHP_EOL );
+			$output->writeln( PHP_EOL . " <error>No se encontro el esquema dentro del directorio: ".Ki_SYSTEM."app/src/storage/schemas/{$version}</error>" . PHP_EOL );
 			exit;
 		}
 
@@ -89,7 +90,7 @@ Class DatabaseCommand extends Command
 			return;
 		}
 
-        $DriverManager = \Db::model()->getDriverManager();
+        $DriverManager = Service::get('database.manager')->getConnectionManager()->getConnection();
         $sm = $DriverManager->getSchemaManager();
 
         // Obtiene el esquema de la base de datos.

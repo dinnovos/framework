@@ -2,7 +2,7 @@
 /**
  * This file is part of the Kodazzi Framework.
  *
- * (c) Jorge Gaitan <jgaitan@kodazzi.com>
+ * (c) Jorge Gaitan <info@kodazzi.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -33,6 +33,7 @@ Class Shell
 		$cli->add(Service::get('command.model'));
 		$cli->add(Service::get('command.form'));
 		$cli->add(Service::get('command.bundle'));
+		$cli->add(Service::get('command.routes'));
 
 		$cli->run();
 	}

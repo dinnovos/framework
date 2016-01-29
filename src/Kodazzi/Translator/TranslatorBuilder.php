@@ -2,7 +2,7 @@
 /**
  * This file is part of the Kodazzi Framework.
  *
- * (c) Jorge Gaitan <jgaitan@kodazzi.com>
+ * (c) Jorge Gaitan <info@kodazzi.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -34,11 +34,11 @@ Class TranslatorBuilder
         $data = array();
         $part_locale = explode('_', $locale);
 
-        $bundles = Service::getNamespacesBundles();
+        $bundles = Service::getBundles();
 
         foreach($bundles as $bundle)
         {
-            $path_i18n = str_replace('\\', '/', YS_BUNDLES.$bundle.'i18n/'.$part_locale[0]);
+            $path_i18n = str_replace('\\', '/', $bundle->getPath().'/i18n/'.$part_locale[0]);
 
             if(is_dir($path_i18n))
             {
@@ -55,7 +55,7 @@ Class TranslatorBuilder
             }
         }
 
-        $path_i18n = str_replace('\\', '/', YS_APP.'src/i18n/'.$part_locale[0]);
+        $path_i18n = str_replace('\\', '/', Ki_APP.'src/i18n/'.$part_locale[0]);
 
         if(is_dir($path_i18n))
         {

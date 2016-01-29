@@ -2,7 +2,7 @@
 /**
  * This file is part of the Kodazzi Framework.
  *
- * (c) Jorge Gaitan <jgaitan@kodazzi.com>
+ * (c) Jorge Gaitan <info@kodazzi.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -32,18 +32,18 @@ Class Image extends \Kodazzi\Form\Fields\File
 
 		if ( $isValid && (count($this->max_dimensions) || count($this->min_dimensions)) )
 		{
-			$this->mkdir( YS_PUBLIC . '/tmp' );
+			$this->mkdir( Ki_PUBLIC . '/tmp' );
 
 			$name_tmp = date('h-m-s', time()) .'-'. $this->new_name;
 
 			// Copia la imagen en el directorio temporal dentro de public_html/
-			\Kodazzi\Tools\File::copy( $value->getPathname(), YS_PUBLIC . '/tmp/'.$name_tmp );
+			\Kodazzi\Tools\File::copy( $value->getPathname(), Ki_PUBLIC . '/tmp/'.$name_tmp );
 
-			if ( is_file(YS_PUBLIC . '/tmp/' . $name_tmp) )
+			if ( is_file(Ki_PUBLIC . '/tmp/' . $name_tmp) )
 			{
 				$return = true;
 				
-				list($width, $height, $type) = getimagesize(YS_PUBLIC . '/tmp/' . $name_tmp);
+				list($width, $height, $type) = getimagesize(Ki_PUBLIC . '/tmp/' . $name_tmp);
 
 				if( count($this->min_dimensions) )
 				{
@@ -68,7 +68,7 @@ Class Image extends \Kodazzi\Form\Fields\File
 				}
 
 				/* Elimina la imagen temporarl */
-				unlink( YS_PUBLIC . '/tmp/' . $name_tmp );
+				unlink( Ki_PUBLIC . '/tmp/' . $name_tmp );
 
 				return $return;
 			}

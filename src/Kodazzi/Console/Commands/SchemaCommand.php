@@ -2,7 +2,7 @@
 /**
  * This file is part of the Kodazzi Framework.
  *
- * (c) Jorge Gaitan <jgaitan@kodazzi.com>
+ * (c) Jorge Gaitan <info@kodazzi.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -52,7 +52,7 @@ Class SchemaCommand extends Command
 
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-        $path_schema = YS_APP . 'src/storage/schemas/';
+        $path_schema = Ki_APP . 'src/storage/schemas/';
 		$action = $input->getArgument('action');
 		$behavior = $input->getArgument('behavior');
         $yaml = new Parser();
@@ -64,18 +64,18 @@ Class SchemaCommand extends Command
 			exit;
 		}
 
-        $bundles = Service::getNamespacesBundles();
+        $bundles = Service::getBundles();
 
         $_schema = array();
         $mirrors = array();
 
         foreach($bundles as $bundle)
         {
-            $dir_schema = str_replace('\\', '/', YS_BUNDLES.$bundle.'config/schema');
+            $dir_schema = str_replace('\\', '/', $bundle->getPath().'/config/schema');
 
             if(is_dir($dir_schema))
             {
-                $mirrors[$bundle] = $bundle;
+                $mirrors[$bundle->getNameSpace()] = $bundle;
 
                 $finder = new Finder();
                 $finder->files()->name('*.yml')->in($dir_schema);
@@ -125,7 +125,7 @@ Class SchemaCommand extends Command
 
                 foreach($mirrors as $namespace => $mirror)
                 {
-                    $path_source = str_replace('\\', '/',YS_BUNDLES.$namespace.'config/schema');
+                    $path_source = str_replace('\\', '/',Ki_BUNDLES.$namespace.'/config/schema');
 
                     // Hace un espejo desde el esquema del bundle al directorio temporal
                     $fs->mirror($path_source, $_path_schema_tmp.$namespace, null, array('override'=>true,'delete'=>true));
@@ -149,7 +149,11 @@ Class SchemaCommand extends Command
 	private function createSchema( $input, $output, $path_schema, $schema, $behavior )
 	{
 		$GenerateClass = Service::get('generate_class');
-        $prefix = Service::get('config')->get('db', 'prefix', '');
+        $connectionOptions = (Ki_ENVIRONMENT == 'prod') ? Service::get('config')->get('db', 'prod') :  Service::get('config')->get('db', 'dev') ;
+        $connectionOptions = (array_key_exists('default', $connectionOptions)) ? $connectionOptions['default'] : current($connectionOptions);
+
+        $prefix = (array_key_exists('prefix', $connectionOptions)) ? $connectionOptions['prefix'] : '';
+
         $helper = $this->getHelper('question');
 		$fs = new Filesystem();
 		$dateTime = new \DateTime();
@@ -193,7 +197,7 @@ Class SchemaCommand extends Command
 		$schema = include $path_schema.'current/schema.php';
 
 		// Se crea el archivo .sql que contendra la estructura del esquema para la base de datos.
-		$querys = $schema->toSql(Service::get('db')->getDriverManager()->getDatabasePlatform());
+		$querys = $schema->toSql(Service::get('database.manager')->getConnectionManager()->getConnection()->getDatabasePlatform());
 
 		$sql = "";
 		foreach( $querys as $query )
@@ -204,7 +208,7 @@ Class SchemaCommand extends Command
 		$fs->dumpFile($path_schema.'current/database.sql',$sql);
 		$output->writeln(" <info>- Se genero el archivo database.sql correctamente.</info>");
 
-		$output->writeln( PHP_EOL." <info>EL esquema fue creado correctamente en: ".YS_SYSTEM."app/src/storage/schemas/current/</info>" );
+		$output->writeln( PHP_EOL." <info>EL esquema fue creado correctamente en: ".Ki_SYSTEM."app/src/storage/schemas/current/</info>" );
 	}
 
 	private function freezeSchema( $input, $output, $path_schema, $schema )

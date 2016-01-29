@@ -1,5 +1,17 @@
 [?php
+/**
+* This file is part of the Kodazzi Framework.
+*
+* (c) Jorge Gaitan <info@kodazzi.com>
+*
+* For the full copyright and license information, please view the LICENSE
+* file that was distributed with this source code.
+*/
+
 namespace ##NAMESPACE##;
+
+use Kodazzi\Orm\ActiveRecord;
+
 <?php 
 $_foreigns = array();
 $has_title = false;
@@ -7,10 +19,16 @@ foreach ( $data['fields'] as $field => $_options )
 {
 	if($_options['type'] == 'foreign')
 	{
+        // Si "model" no tiene el formato Company\Bundle:Model lo coloca con el formato
+        if(! strpos($_options['model'], ':'))
+        {
+            $_options['model'] = "{$options['namespace_bundle']}:{$_options['model']}";
+        }
+
 		$_foreigns[$field] = $_options;
 	}
 
-	if ( $_options['type'] == 'primary' )
+	if ($_options['type'] == 'primary')
 	{
 		$field_primary = $field;
 	}
@@ -22,13 +40,22 @@ foreach ( $data['fields'] as $field => $_options )
 		$has_title = true;
 	}
 }
+
+if(array_key_exists('translatable', $data['options']))
+{
+    // Si "model" no tiene el formato Company\Bundle:Model lo coloca con el formato
+    if(! strpos($data['options']['translatable'], ':'))
+    {
+        $data['options']['translatable'] = "{$options['namespace_bundle']}:{$data['options']['translatable']}";
+    }
+}
 ?>
 /** 
 * @Table("<?php echo $data['options']['table'] ?>")
 */
-Class ##CLASS##
+Class ##CLASS## extends ActiveRecord
 {
-	const table = '<?php echo $options['_prefix']?><?php echo strtolower($data['options']['table']) ?>';
+	const table = '<?php echo strtolower($data['options']['table']) ?>';
 <?php if( isset($field_title) ): ?>
 	const title = '<?php echo $field_title; ?>';
 <?php endif; ?>
@@ -37,10 +64,10 @@ Class ##CLASS##
 	const hasTimestampable = true;
 <?php endif; ?>
 <?php if(array_key_exists('translatable', $data['options']) && $data['options']['translatable']): ?>
-    const modelLanguage = '<?php echo str_replace('/', '\\',$options['namespace_base_model']).$data['options']['translatable']; ?>Model';
+    const modelLanguage = '<?php echo "{$data['options']['translatable']}"; ?>';
 <?php endif; ?>
 <?php if(array_key_exists('translatable', $data['options']) && $data['options']['translatable']): ?>
-    const modelTranslation = '<?php echo str_replace('/', '\\',$options['namespace_base_model']).$options['model']; ?>TranslationModel';
+    const modelTranslation = '<?php echo "{$options['namespace_bundle']}:{$options['model']}"; ?>Translation';
 <?php endif; ?>
 <?php if(isset($data['options']['sluggable']) && count($data['options']['sluggable'])): ?>
 
@@ -56,13 +83,13 @@ Class ##CLASS##
 		return array(
 <?php foreach($_foreigns as $_field => $_opt){ ?>
 <?php if($_opt['relation'] == 'one-to-one'){ ?>
-			'<?php echo str_replace('/', '\\',$options['namespace_base_model'].$_opt['model']); ?>Model' => array('field' => '<?php echo $_field; ?>' , 'fieldLocal' => '<?php echo $_opt['join']['name'] ?>' ),
+			'<?php echo str_replace('/', '\\',$_opt['model']); ?>' => array('field' => '<?php echo $_field; ?>' , 'fieldLocal' => '<?php echo $_opt['join']['name'] ?>' ),
 <?php }elseif($_opt['relation'] == 'many-to-one'){ ?>
-			'<?php echo str_replace('/', '\\',$options['namespace_base_model'].$_opt['model']); ?>Model' => array('field' => '<?php echo $_field; ?>' , 'fieldLocal' => '<?php echo $_opt['join']['name'] ?>' ),
+			'<?php echo str_replace('/', '\\',$_opt['model']); ?>' => array('field' => '<?php echo $_field; ?>' , 'fieldLocal' => '<?php echo $_opt['join']['name'] ?>' ),
 <?php }elseif($_opt['relation'] == 'one-to-many'){ ?>
-			'<?php echo str_replace('/', '\\',$options['namespace_base_model'].$_opt['model']); ?>Model' => array('field' => '<?php echo $_field; ?>' , 'fieldForeign' => '<?php echo $_opt['join']['foreignField'] ?>' ),
+			'<?php echo str_replace('/', '\\',$_opt['model']); ?>' => array('field' => '<?php echo $_field; ?>' , 'fieldForeign' => '<?php echo $_opt['join']['foreignField'] ?>' ),
 <?php }elseif($_opt['relation'] == 'many-to-one-self-referencing'){ ?>
-			'<?php echo str_replace('/', '\\',$options['namespace_base_model'].$_opt['model']); ?>Model' => array('field' => '<?php echo $_field; ?>' , 'fieldLocal' => '<?php echo $_opt['join']['name'] ?>' ),
+			'<?php echo str_replace('/', '\\',$_opt['model']); ?>' => array('field' => '<?php echo $_field; ?>' , 'fieldLocal' => '<?php echo $_opt['join']['name'] ?>' ),
 <?php } ?>
 <?php } ?>
 		);

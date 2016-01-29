@@ -2,7 +2,7 @@
 /**
  * This file is part of the Kodazzi Framework.
  *
- * (c) Jorge Gaitan <jgaitan@kodazzi.com>
+ * (c) Jorge Gaitan <info@kodazzi.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -15,6 +15,8 @@
  */
 
 namespace Kodazzi\Tools;
+
+use Kodazzi\Container\Service;
 
 Class Util
 {
@@ -146,9 +148,9 @@ Class Util
 		return false;
 	}
 
-    static public function buildUrl($route, $parameters = array())
+    static public function buildUrl($name, $parameters = array(), $locale = null)
     {
-        if($route == '@default' || preg_match('/^(\@default)/', $route))
+        if($name == '@default' || preg_match('/^(\@default)/', $name))
         {
             foreach($parameters as $key => $parameter)
             {
@@ -159,13 +161,31 @@ Class Util
             }
         }
 
-        return \Service::get('kernel.url_generator')->generate( $route, $parameters);
+        // Forza la url para generarla desde una lenguaje especifico
+        if($locale)
+        {
+            $name = "{$name}-{$locale}";
+        }
+        else
+        {
+            $locale = ($locale) ? $locale : Service::get('session')->getLocale();
+
+            // Primero intenta encontrar la ruta concatenada con el lenguaje actual
+            $Route = Service::get('kernel.routes')->get("{$name}-{$locale}");
+
+            if($Route)
+            {
+                $name = "{$name}-{$locale}";
+            }
+        }
+
+        return Service::get('kernel.url_generator')->generate($name, $parameters);
     }
 
     static function bundle($namespace, $action)
     {
         $namespace = str_replace('/', '\\', $namespace);
-        $bundles = \Service::getNamespacesBundles();
+        $bundles = \Service::getBundles();
 
         $namespace_slug = \Kodazzi\Tools\StringProcessor::slug($namespace);
         $bundles_activated = array();
@@ -178,8 +198,9 @@ Class Util
 
         foreach($bundles as $bundle)
         {
-            $bundle_slug = \Kodazzi\Tools\StringProcessor::slug($bundle);
-            $bundles_activated[$bundle_slug] = trim($bundle,'\\');
+            $bundle_slug = \Kodazzi\Tools\StringProcessor::slug($bundle->getNameSpace());
+
+            $bundles_activated[$bundle_slug] = trim($bundle->getNameSpace(),'\\');
         }
 
         if($action == 'new')
@@ -199,13 +220,39 @@ Class Util
         $GenerateClass->setTemplate('AppKernel');
         $GenerateClass->setNameClass('AppKernel');
         $GenerateClass->setNameClassExtend('Kernel');
-        $GenerateClass->create(YS_APP. 'AppKernel', array('bundles'=>$bundles_activated));
+        $GenerateClass->create(Ki_APP. 'AppKernel', array('bundles'=>$bundles_activated));
 
         // Elimina el directorio del bundle
-        if($action == 'delete' && is_dir(YS_BUNDLES.str_replace('\\', '/', $namespace)))
+        if($action == 'delete' && is_dir(Ki_BUNDLES.str_replace('\\', '/', $namespace)))
         {
             $fs = new \Symfony\Component\Filesystem\Filesystem();
-            $fs->remove(YS_BUNDLES.str_replace('\\', '/', $namespace));
+            $fs->remove(Ki_BUNDLES.str_replace('\\', '/', $namespace));
         }
+    }
+
+    static function getShortNamespaceModel($namespace)
+    {
+        $namespace = str_replace('\Models\\', ':', $namespace);
+        $namespace = trim($namespace, 'Model');
+
+        return $namespace;
+    }
+
+    static function getNamespaceModel($shortNamespace)
+    {
+        if(strpos($shortNamespace, ':'))
+        {
+            $p = explode(':', $shortNamespace);
+            $p[1] = ucfirst($p[1]);
+
+            if(count($p) > 2)
+            {
+                throw new \Exception("El formato '{$shortNamespace}' para el modelo no es valido.");
+            }
+
+            return "{$p[0]}\\Models\\{$p[1]}Model";
+        }
+
+        throw new \Exception("El formato '{$shortNamespace}' para el modelo no es valido.");
     }
 }

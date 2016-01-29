@@ -2,7 +2,7 @@
 /**
  * This file is part of the Kodazzi Framework.
  *
- * (c) Jorge Gaitan <jgaitan@kodazzi.com>
+ * (c) Jorge Gaitan <info@kodazzi.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -39,6 +39,30 @@ Class SessionBuilder extends Session
 		return $_hash.':'.substr($_hash, 1, 4); 
 	}
 
+    public function setLocale($local)
+    {
+        $this->set('_locale', $local);
+    }
+
+    public function getLocale()
+    {
+        if($this->has('_locale'))
+        {
+            return $this->get('_locale');
+        }
+
+        $locale = explode('_', $this->config->get('app', 'local', 'en'));
+
+        return $locale[0];
+    }
+
+    public function getDefaultLocale()
+    {
+        $locale = explode('_', $this->config->get('app', 'local'));
+
+        return $locale[0];
+    }
+
 	public function createTokenSession()
 	{
 		return $this->_tokenSession();
@@ -65,6 +89,6 @@ Class SessionBuilder extends Session
 	{
 		$token = $this->config->get('app', 'token');
 
-		return sha1( 'f42xG51gd'.$_SERVER['HTTP_USER_AGENT'].$token );
+		return sha1( $_SERVER['HTTP_USER_AGENT'].$token );
 	}
 }

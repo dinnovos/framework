@@ -9,11 +9,11 @@
 * file that was distributed with this source code.
 */
 
-namespace <?php echo $options['bundle'] ?>\Main;
+namespace <?php echo $options['namespace'] ?>;
 
-use Kodazzi\Controller;
+use Kodazzi\Bundle\Bundle;
 
-class BundleController extends Controller
+class HookBundle extends Bundle
 {
 
 }

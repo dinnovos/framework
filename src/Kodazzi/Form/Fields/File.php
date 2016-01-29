@@ -2,7 +2,7 @@
 /**
  * This file is part of the Kodazzi Framework.
  *
- * (c) Jorge Gaitan <jgaitan@kodazzi.com>
+ * (c) Jorge Gaitan <info@kodazzi.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -38,7 +38,7 @@ Class File extends \Kodazzi\Form\Field
 
 		$name_form = strtolower($this->getNameForm());
 
-		$this->path_upload = YS_PUBLIC . YS_UPLOAD . $name_form . '/';
+		$this->path_upload = Ki_PUBLIC . Ki_UPLOAD . $name_form . '/';
 
 		$Form = $this->getForm();
 		$path_upload = $Form->getPathUpload();

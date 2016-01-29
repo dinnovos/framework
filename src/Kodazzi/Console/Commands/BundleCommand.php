@@ -2,7 +2,7 @@
 /**
  * This file is part of the Kodazzi Framework.
  *
- * (c) Jorge Gaitan <jgaitan@kodazzi.com>
+ * (c) Jorge Gaitan <info@kodazzi.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -51,7 +51,7 @@ Class BundleCommand extends Command
 
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-        $path_schema = YS_APP . 'src/storage/schemas/';
+        $path_schema = Ki_APP . 'src/storage/schemas/';
 		$action = $input->getArgument('action');
 		$namespace = $input->getArgument('namespace');
         $yaml = new Parser();
@@ -67,7 +67,7 @@ Class BundleCommand extends Command
 		{
 			case 'CREATE':
 
-                if(is_dir(YS_BUNDLES.$namespace))
+                if(is_dir(Ki_BUNDLES.$namespace))
                 {
                     $output->writeln( PHP_EOL . 'Ya existe un bundle con el  mismo espacio de nombre.' . PHP_EOL );
 
@@ -75,25 +75,25 @@ Class BundleCommand extends Command
                 }
 
                 // Crea el directorio config/
-                $this->mkdir(YS_BUNDLES.$namespace.'/config/schema');
+                $this->mkdir(Ki_BUNDLES.$namespace.'/config/schema');
 
                 // Crea el directorio Controllers/
-                $this->mkdir(YS_BUNDLES.$namespace.'/Controllers');
+                $this->mkdir(Ki_BUNDLES.$namespace.'/Controllers');
 
                 // Crea el directorio i18n/
-                $this->mkdir(YS_BUNDLES.$namespace.'/i18n');
+                $this->mkdir(Ki_BUNDLES.$namespace.'/i18n');
 
                 // Crea el directorio Main/
-                $this->mkdir(YS_BUNDLES.$namespace.'/Main');
+                $this->mkdir(Ki_BUNDLES.$namespace.'/Main');
 
                 // Crea el directorio Providers/
-                $this->mkdir(YS_BUNDLES.$namespace.'/Providers');
+                $this->mkdir(Ki_BUNDLES.$namespace.'/Providers');
 
                 // Crea el directorio Services/
-                $this->mkdir(YS_BUNDLES.$namespace.'/Services');
+                $this->mkdir(Ki_BUNDLES.$namespace.'/Services');
 
                 // Crea el directorio vies/
-                $this->mkdir(YS_BUNDLES.$namespace.'/views/home');
+                $this->mkdir(Ki_BUNDLES.$namespace.'/views/home');
 
                 $GenerateClass = Service::get('generate_class');
 
@@ -102,14 +102,14 @@ Class BundleCommand extends Command
                 $GenerateClass->setValues( array(
                     'bundle' => str_replace('/', '\\', $namespace)
                 ) );
-                $GenerateClass->create(YS_BUNDLES . $namespace . '/Controllers/HomeController');
+                $GenerateClass->create(Ki_BUNDLES . $namespace . '/Controllers/HomeController');
 
                 // Crea la clase BundleController
                 $GenerateClass->setTemplate('BundleController');
                 $GenerateClass->setValues( array(
                     'bundle' => str_replace('/', '\\', $namespace)
                 ) );
-                $GenerateClass->create(YS_BUNDLES . $namespace . '/Main/BundleController');
+                $GenerateClass->create(Ki_BUNDLES . $namespace . '/Main/BundleController');
 
                 // Crea las rutas del bundle
                 $GenerateClass->setTemplate('routes');
@@ -117,19 +117,30 @@ Class BundleCommand extends Command
                     'bundle' => str_replace('/', '\\', $namespace),
                     'route' => str_replace(array('/', '\\'), '-', strtolower($namespace)),
                 ) );
-                $GenerateClass->create(YS_BUNDLES . $namespace . '/config/routes.cf');
+                $GenerateClass->create(Ki_BUNDLES . $namespace . '/config/routes.cf');
 
                 // Crea la plantilla index.twig
                 $GenerateClass->setTemplate('index');
-                $GenerateClass->create(YS_BUNDLES . $namespace . '/views/home/index', array(), '.twig');
+                $GenerateClass->create(Ki_BUNDLES . $namespace . '/views/home/index', array(), '.twig');
+
+                // Crea el HookBundle
+                $GenerateClass->setTemplate('HookBundle');
+                $GenerateClass->setValues( array(
+                    'namespace' => str_replace('/', '\\', $namespace)
+                ) );
+                $GenerateClass->create(Ki_BUNDLES . $namespace . '/HookBundle');
 
                 \Kodazzi\Tools\Util::bundle($namespace, 'new');
+
+                $output->writeln( PHP_EOL . 'El bundle ' . str_replace('/', '\\', $namespace) . ' ha sido creado con exito' . PHP_EOL );
+
+                exit;
 
 				break;
 
 			case 'DELETE':
 
-                if(!is_dir(YS_BUNDLES.$namespace))
+                if(!is_dir(Ki_BUNDLES.$namespace))
                 {
                     $output->writeln( PHP_EOL . 'No se ha encontrado el bundle' . PHP_EOL );
 
@@ -137,6 +148,8 @@ Class BundleCommand extends Command
                 }
 
                 \Kodazzi\Tools\Util::bundle($namespace, 'delete');
+
+                $output->writeln( PHP_EOL . 'El bundle ' . str_replace('/', '\\', $namespace) . ' ha sido eliminado con exito' . PHP_EOL );
 
 				break;
 		}

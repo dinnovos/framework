@@ -2,7 +2,7 @@
  /**
  * This file is part of the Kodazzi Framework.
  *
- * (c) Jorge Gaitan <jgaitan@kodazzi.com>
+ * (c) Jorge Gaitan <info@kodazzi.com>
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
@@ -17,7 +17,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Kodazzi\Config\ConfigBuilder;
 use Kodazzi\EventDispatcher\Event;
-use Kodazzi\Orm\Db;
+use Kodazzi\Orm\DatabaseManager;
+use Kodazzi\Orm\Model;
 use Kodazzi\Form\FormBuilder;
 use Kodazzi\Session\SessionBuilder;
 use Kodazzi\Translator\TranstalorBuilder;
@@ -48,6 +49,11 @@ Class Controller
         }
 
         return null;
+    }
+
+    public function setLocale($locale)
+    {
+        $this->getSession()->setLocale($locale);
     }
 
    /**
@@ -84,11 +90,19 @@ Class Controller
     }
 
     /**
-     * @return Db
+     * @return DatabaseManager
      */
-    public function getDB()
+    public function getDatabaseManager()
     {
-        return Service::get('db');
+        return Service::get('database.manager');
+    }
+
+    /**
+     * @return Model
+     */
+    public function model($namespace, $alias = 'a')
+    {
+        return $this->getDatabaseManager()->model($namespace, $alias);
     }
 
     /**
@@ -189,9 +203,9 @@ Class Controller
         return new Response($this->getView()->render($template, $data));
     }
 
-    public function buildUrl($route, $parameters = array())
+    public function buildUrl($route, $parameters = array(), $locale = null)
     {
-        return \Kodazzi\Tools\Util::buildUrl($route, $parameters);
+        return \Kodazzi\Tools\Util::buildUrl($route, $parameters, $locale);
     }
 
     public function redirectResponse( $url, $status = 302 )
