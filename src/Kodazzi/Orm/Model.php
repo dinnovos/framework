@@ -23,15 +23,6 @@ class Model
     private $driver = null;
     private $propertiesInstance = array();
 
-    /*
-	protected $namespace = null;
-    protected $alias = null;
-    protected $table = null;
-    protected $primary = null;
-    protected $instance_model = null;
-    protected $title = null;
-    */
-
     protected $fields = '*';
 
     /**

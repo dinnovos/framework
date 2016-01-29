@@ -9,6 +9,7 @@
  */
 
 define( 'Ki_SRC_ROOT', realpath(dirname(__FILE__) . '/../') . '/src/');
+
 define( 'Ki_CACHE', Ki_APP . 'src/cache/' );
 define( 'Ki_EXT_TEMPLATE', '.twig' );
 
@@ -64,7 +65,7 @@ Service::set('kernel.url_generator', function(){
 });
 
 Service::set('listener.router', function(){
-    return new Symfony\Component\HttpKernel\EventListener\RouterListener(Service::get('kernel.matcher'), null, null, Service::get('kernel.stack'));
+    return new Symfony\Component\HttpKernel\EventListener\RouterListener(Service::get('kernel.matcher'), Service::get('kernel.stack'), null, null);
 });
 
 Service::set('listener.controller', function(){

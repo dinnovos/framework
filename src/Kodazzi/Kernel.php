@@ -64,11 +64,7 @@ class Kernel extends HttpKernel
         // Carga todas las rutas de los bundles instalados.
         foreach($bundles as $bundle)
         {
-            $namespace = $bundle->getNamespace();
             $path = $bundle->getPath();
-
-            $loader->set($namespace, array($path));
-
             $path_config = str_replace('\\', '/', $path.'/config/');
 
             $finder = new Finder();
