@@ -22,6 +22,7 @@ class ConfigBuilder implements ConfigBuilderInterface
 		$this->config['db'] = require Ki_APP . 'config/db.cf.php';
 		$this->config['providers'] = require Ki_APP . 'config/providers.cf.php';
 		$this->config['security'] = require Ki_APP . 'config/security.cf.php';
+		$this->config['bundles'] = require Ki_APP . 'config/bundles.cf.php';
 	}
 
 	public function get( $file, $key = null, $default = -1)
