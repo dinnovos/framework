@@ -47,7 +47,7 @@ Class Service
             return self::$singleton[$alias];
         }
 
-        if ( ! isset (self::$map[$alias]))
+        if (! isset (self::$map[$alias]))
         {
             return null;
         }
@@ -59,7 +59,7 @@ Class Service
             $reflection = new \ReflectionClass($resolver);
 
             // Verifica si se puede instanciar la clase
-            if ( ! $reflection->isInstantiable())
+            if (! $reflection->isInstantiable())
             {
                 throw new \Exception($alias . " The class is not instantiable");
             }
@@ -81,7 +81,7 @@ Class Service
         }
         elseif ($resolver instanceof \Closure)
         {
-            if(!is_array($options))
+            if(! is_array($options))
             {
                 echo "$alias $options";
             }
@@ -97,11 +97,21 @@ Class Service
         return $object;
     }
 
+    /**
+     * Inserta en el contenedor los bundles del proyecto
+     *
+     * @param $bundles array
+     */
     public static function registerBundles($bundles)
     {
         self::$bundles = $bundles;
     }
 
+    /**
+     * Retorna el array de bundles del proyecto
+     *
+     * @return array
+     */
     public static function getBundles()
     {
         return self::$bundles;

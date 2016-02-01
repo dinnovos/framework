@@ -10,33 +10,46 @@
 
 namespace Kodazzi;
 
-use Service;
 use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Debug\Debug;
+use Service;
 
 class Kernel extends HttpKernel
 {
     protected $resolver;
     protected $dispatcher;
-    protected $loader;
 
-    public function __construct()
+    public function __construct($environment = 'prod', $debug = false)
     {
-        $this->loader = Service::get('kernel.loader');
+        // dev, prod or schell
+        define ('Ki_ENVIRONMENT', $environment);
+        define ('Ki_DEBUG', is_bool($debug) ? $debug : false);
 
-        if (!in_array(Ki_ENVIRONMENT, array('dev', 'prod', 'shell')))
+        if (Ki_DEBUG)
+            Debug::enable();
+        else
+            ini_set( 'display_errors', 0 );
+
+        if (! in_array(Ki_ENVIRONMENT, array('dev', 'prod', 'shell')))
         {
-            throw new \Exception("El entorno \"".Ki_ENVIRONMENT."\" no est&aacute; permitido");
+            throw new \Exception("El entorno '".Ki_ENVIRONMENT."' no está permitido en el sistema.");
         }
 
-        // Metodo de carga inicial
-        $this->start();
+        // Agrega la instancia del kernel al contenedor de servicios.
+        // Util para ser usada cuando de desde realizar una sub peticion dende en controlador.
+        Service::instance('kernel', $this);
 
-        // Carga la configuracion de los bundles
-        $this->registerBundles();
+        // Registra la bolsa temporal en la session
+        $session = Service::get('session');
+        $session->registerBag(Service::get('temporary_bag'));
+        $session->start();
 
         // Carga la configuracion del proyecto
         Service::get('config')->loadConfigGlobal();
+
+        // Carga la configuracion de los bundles
+        $this->registerBundles();
 
         // Carga la clase translator
         Service::get('translator')->loader(Service::get('session')->getLocale());
@@ -57,8 +70,10 @@ class Kernel extends HttpKernel
 
     public function registerBundles()
     {
-        $loader = $this->loader;
-        $bundles = Service::getBundles();
+        $bundles = Service::get('config')->get('bundles');
+
+        Service::registerBundles($bundles);
+
         $routes = Service::get('kernel.routes');
 
         // Carga todas las rutas de los bundles instalados.

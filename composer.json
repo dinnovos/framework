@@ -27,6 +27,10 @@
         "twig/twig"                 	:"1.*",
         "doctrine/dbal"             	:"2.*",
         "phpmailer/phpmailer"       	:"5.*",
-        "mobiledetect/mobiledetectlib"	:"2.*"
+        "mobiledetect/mobiledetectlib"	:"2.*",
+		"fabpot/goutte"                 :"3.*"
+    },
+	"require-dev": {
+        "phpunit/phpunit":              "4.*"
     }
 }
