@@ -132,7 +132,14 @@ Class FormsCommand extends Command
 		$output->write( PHP_EOL . "Lista de Clases Forms:" . PHP_EOL );
 
 		foreach ( $schema as $table => $options )
-		{
+        {
+            if(strpos($table, ':'))
+            {
+                $p = explode(':', $table);
+
+                $table = $p[1];
+            }
+
 			/* Si la clase extendida existe no la sobreescribe */
 			if ( !is_file( Ki_BUNDLES . $bundle . '/Forms/' . ucfirst( $table ) . 'Form.php' ) )
 			{
@@ -151,8 +158,9 @@ Class FormsCommand extends Command
 			$GenerateClass->setNamespace( ucfirst( str_replace('/', '\\', $bundle) ) . '\Forms\Base' );
 			$GenerateClass->setValues( array(
 				'namespace_base_model'  => ucfirst( $bundle ) . '\Models\\',
-				'model'		            => ucfirst( $bundle ) . '\Models\\' . ucfirst( $table ).'Model',
-                'form_translation'      => ucfirst( str_replace('/', '\\', $bundle) ) . '\Forms\\'.ucfirst( $table )
+                'form_translation'      => ucfirst( str_replace('/', '\\', $bundle)) . '\Forms\\'.ucfirst( $table ),
+                'namespace_bundle'      => ucfirst( str_replace('/', '\\', $bundle)),
+                'model'		            => ucfirst( $bundle ) . ':' . ucfirst( $table ),
 			) );
 
 			$GenerateClass->create( Ki_BUNDLES . $bundle . '/Forms/Base/' . ucfirst( $table ) . 'FormBase', $options );

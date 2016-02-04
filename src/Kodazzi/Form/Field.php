@@ -16,6 +16,10 @@
 
 namespace Kodazzi\Form;
 
+use Kodazzi\Container\Service;
+use Kodazzi\Orm\DatabaseManager;
+use Kodazzi\Orm\Model;
+
 abstract Class Field
 {
 	protected $template = 'form/default_row';
@@ -265,10 +269,9 @@ abstract Class Field
 		return $this;
 	}
 
-	/*
-	 * @return Kodazzi\Forms\Field
-	 */
-
+    /**
+     * @return \Kodazzi\Forms\Field
+     */
 	public function setClassCss($class)
 	{
 		$this->class_css = $class;
@@ -276,10 +279,9 @@ abstract Class Field
 		return $this;
 	}
 
-	/*
-	 * @return \Kodazzi\Forms\Field
-	 */
-
+    /**
+     * @return \Kodazzi\Forms\Field
+     */
 	public function setMaxLength($length = 255, $msg = null)
 	{
 		if (!is_integer($length))
@@ -293,7 +295,7 @@ abstract Class Field
 		return $this;
 	}
 
-	/*
+	/**
 	 * @return \Kodazzi\Forms\Field
 	 */
 	public function setMinLength($length = 0, $msg = null)
@@ -339,9 +341,9 @@ abstract Class Field
 		return $this;
 	}
 
-	/*\
-	 * @return Kodazzi\Form\Field
-	 */
+    /**
+     * @return \Kodazzi\Forms\Field
+     */
 	public function setTemplate($template)
 	{
 		$this->template = $template;
@@ -537,14 +539,14 @@ abstract Class Field
 		// En este punto no se actualiza el valor del campo y se utiliza facilmente en save()
 		if ($type == 'FILE' || $type == 'IMAGE')
 		{
-			if (!$this->form->isNew() && ( $data == '' || $data == null ))
+			if (! $this->form->isNew() && ( $data == '' || $data == null ))
 			{
 				return true;
 			}
 		}
 
 		/* Todos los campos menos Editor, File, Image y Table - se valida el minimo y maximo de caracteres */
-		if ( !in_array($type, array('EDITOR', 'FILE', 'IMAGE', 'TABLE')) )
+		if (! in_array($type, array('EDITOR', 'FILE', 'IMAGE', 'TABLE')) )
 		{
 			if ( $this->max_length && strlen($data) > $this->max_length )
 			{
@@ -566,35 +568,32 @@ abstract Class Field
 		$this->value = $data;
 
 		// Llama al validador del widget
-		if ( !$this->valid() )
+		if (! $this->valid())
 		{
-			$this->msg_error = ( $this->msg_error ) ? $this->msg_error : $this->I18n->get( 'form.'.strtolower($type), 'Is Invalid.' );
+			$this->msg_error = ( $this->msg_error ) ? $this->msg_error : $this->I18n->get('form.'.strtolower($type), 'Is Invalid.');
 
 			$this->value = null;
 
 			return false;
 		}
 
-		if ( $this->is_unique )
+		if ($this->is_unique)
 		{
-			$db = \Service::get('db')->model($this->form->getNameModel());
+            /**
+             * @var $db Model
+             */
+            $Model = Service::get('database.manager')->model($this->form->getNameModel());
 
 			if( $this->form->isNew() )
 			{
-				$exist = $db->exist( array($this->name => $this->value) );
+				$exist = $Model->where($this->name, '=', $this->value)->exist();
 			}
 			else
 			{
-				$QueryBuilder = $db->getQueryBuilder();
-				$nameTable = $db->getTable();
-				$fieldPrimary = $db->getFieldPrimary();
-				$instanceModelo = $this->form->getModel();
+                $instanceModelo = $this->form->getModel();
+                $fieldPrimary = $instanceModelo::primary;
 
-				$QueryBuilder->select('COUNT(*) AS total')->from($nameTable, 't')->where("t.$this->name=:$this->name")->andwhere("t.$fieldPrimary <> :$fieldPrimary");
-				$QueryBuilder->setParameter(":$this->name", $this->value);
-				$QueryBuilder->setParameter(":$fieldPrimary", $instanceModelo->$fieldPrimary);
-				$result = $QueryBuilder->execute()->fetch();
-				$exist = (int)$result['total'];
+                $exist = $Model->where($this->name, '=', $this->value)->andWhere($fieldPrimary, '<>', $instanceModelo->$fieldPrimary)->exist();
 			}
 
 			if( $exist )
@@ -606,7 +605,7 @@ abstract Class Field
 		}
 
 		// Si pasa las validaciones  transforma la data para evitar inyeccion sql
-		if ( !in_array($type, array('EDITOR', 'NOTE', 'FILE', 'IMAGE', 'FOREIGN', 'TABLE')) )
+		if (! in_array($type, array('EDITOR', 'NOTE', 'FILE', 'IMAGE', 'FOREIGN', 'TABLE')) )
 		{
 			$this->value = htmlentities($this->value, ENT_QUOTES, 'UTF-8');
 		}

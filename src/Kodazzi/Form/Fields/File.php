@@ -56,34 +56,30 @@ Class File extends \Kodazzi\Form\Field
 
 		if( (int)$this->size * 1024 > $MaxFilesize )
 		{
-			$this->msg_error = strtr($this->I18n->get('max_size_system'), array('%size%' => $MaxFilesize));
+			$this->msg_error = strtr($this->I18n->get('form.max_size_system'), array('%size%' => $MaxFilesize));
 
 			return false;
 		}
 
-		/*
-		 * Valida la extension del archivo
-		 */
+		// Valida la extension del archivo
 		if ( !in_array( $OriginalExtension, $this->ext ) )
 		{
-			$msg = ($this->msg_ext) ? $this->msg_ext : $this->I18n->get('ext_file');
+			$msg = ($this->msg_ext) ? $this->msg_ext : $this->I18n->get('form.ext_file');
 			$this->msg_error = strtr($msg, array('%ext%' => implode(', ', $this->ext)));
 
 			return false;
 		}
 
-		/*
-		 * Valida el peso en kb del archivo.
-		 */
+		// Valida el peso en kb del archivo.
 		if ( $Size > (int)$this->size * 1024 )
 		{
-			$msg = ($this->msg_size) ? $this->msg_size : $this->I18n->get('max_size_file');
+			$msg = ($this->msg_size) ? $this->msg_size : $this->I18n->get('form.max_size_file');
 			$this->msg_error = strtr($msg, array('%size%' => $this->size));
 
 			return false;
 		}
 
-		/* Si el archivo existe lo renombra */
+		// Si el archivo existe lo renombra
 		$i = 0;
 		$pref = '';
 
@@ -145,7 +141,7 @@ Class File extends \Kodazzi\Form\Field
 			}
 			else
 			{
-				$this->msg_error = ( $this->msg_error ) ? $this->msg_error : $this->I18n->get( $this->type, 'upload filled' );
+				$this->msg_error = ( $this->msg_error ) ? $this->msg_error : $this->I18n->get( $this->type, 'form.upload filled' );
 
 				return false;
 			}

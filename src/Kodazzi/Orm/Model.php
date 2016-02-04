@@ -74,7 +74,7 @@ class Model
     public function getForOptions($fields = null)
     {
         $data = array();
-        $fields = ($fields === null) ? "a.{$this->propertiesInstance['primary']}, a.{$this->propertiesInstance['title']}" : $fields;
+        $fields = ($fields === null) ? "{$this->propertiesInstance['alias']}.{$this->propertiesInstance['primary']}, {$this->propertiesInstance['alias']}.{$this->propertiesInstance['title']}" : $fields;
 
         $this->getQueryBuilder()->select($fields);
 
@@ -422,11 +422,6 @@ class Model
     public function getQueryBuilder()
     {
         return ($this->QueryBuilder) ? $this->QueryBuilder : $this->QueryBuilder = $this->DatabaseManager->getQueryBuilder();
-    }
-
-    public function getIdentifier()
-    {
-        return ($this->Connection->lastInsertId()) ? $this->Connection->lastInsertId() : $this->identifier;
     }
 
     public function getTable()

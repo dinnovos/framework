@@ -386,7 +386,7 @@ Class FormHtml
 	 */
 	static public function checkbox( $name, $value = '', $checked = false, $attribute = array() )
 	{
-		$class = '';
+        $str_attribute = '';
 
 		if ( $checked )
 		{
@@ -395,12 +395,12 @@ Class FormHtml
 
 		if ( isset( $attribute['id'] ) && $attribute['id'] != null )
 		{
-            $str_attribute = 'id="' . $attribute['id'] . '" ';
+            $str_attribute .= 'id="' . $attribute['id'] . '" ';
 		}
 
 		if ( isset( $attribute['class'] ) && $attribute['class'] != null )
 		{
-            $str_attribute = 'class="' . $attribute['class'] . '" ';
+            $str_attribute .= 'class="' . $attribute['class'] . '" ';
 		}
 
         if ( isset( $attribute['disabled'] ) && $attribute['disabled'] )

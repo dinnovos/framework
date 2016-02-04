@@ -69,7 +69,6 @@ class ConnectionManager
         $config = new Configuration();
 
         $this->Connection = \Doctrine\DBAL\DriverManager::getConnection($connectionOptions, $config);
-        echo("se ha conectado a la bd");
     }
 
     /**

@@ -17,6 +17,7 @@
 namespace Kodazzi\Form;
 
 use Kodazzi\Form\Field;
+use Kodazzi\Container\Service;
 
 Class InterfaceForm implements \ArrayAccess
 {
@@ -44,7 +45,7 @@ Class InterfaceForm implements \ArrayAccess
 
 	public function __construct( $instance_model = null )
 	{
-		$this->I18n = \Service::get('translator');
+		$this->I18n = Service::get('translator');
 		
 		// token para campo csrf del form
 		$this->csrf_token = sha1( get_class($this) );
@@ -124,9 +125,14 @@ Class InterfaceForm implements \ArrayAccess
 		$this->name_form = $name;
 	}
 
-	public function setNameModel( $name )
+	public function setNameModel( $namespace )
 	{
-		$this->name_model = $name;
+        if(strpos($namespace, ':'))
+        {
+            $namespace = \Kodazzi\Tools\Util::getNamespaceModel($namespace);
+        }
+
+		$this->name_model = $namespace;
 	}
 
 	public function setWidget( $name, Field $widget )
@@ -171,7 +177,7 @@ Class InterfaceForm implements \ArrayAccess
 			return;
 		}
 
-		throw new \Exception( "El campo '$field' no es v&aacute;lido." );
+		throw new \Exception("El campo '$field' no es v&aacute;lido.");
 	}
 
     public function setValid($is_valid, $msg = null)
@@ -272,7 +278,7 @@ Class InterfaceForm implements \ArrayAccess
         $Widgets = $this->getWidgets();
 
         // Obtiene todos los registros de lenguage de la bd
-        $languages = \Service::get('db')->model($instaceModel::modelLanguage)->fetchAll();
+        $languages = \Service::get('database.manager')->model($instaceModel::modelLanguage)->get();
         $model = array();
 
         // Si el formulario tiene una instancia del modelo lo utiliza

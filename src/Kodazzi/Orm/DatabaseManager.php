@@ -31,6 +31,11 @@ class DatabaseManager
      */
     private $Model = null;
 
+    /**
+     * @var identifier
+     */
+    private $identifier = null;
+
     public function __construct($Config, $ConnectionManager, $Model)
     {
         $this->Config = $Config;
@@ -117,7 +122,7 @@ class DatabaseManager
         if($this->propertiesInstance['has_sluggable'])
         {
             // Si en la data existe un campo slug se utiliza en lugar de crearlo
-            if(!array_key_exists('slug', $data))
+            if(! array_key_exists('slug', $data))
             {
                 $slug = '';
                 $fields_slug = $instance->getFieldsSluggable();
@@ -176,6 +181,11 @@ class DatabaseManager
     {
         $Connection = $this->getConnectionManager()->getConnection();
         $Connection->rollBack();
+    }
+
+    public function getIdentifier()
+    {
+        return ($this->identifier) ? $this->identifier : $this->getConnectionManager()->getConnection()->lastInsertId();
     }
 
     private function getPropertiesInstance($instance)

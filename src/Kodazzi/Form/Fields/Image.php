@@ -50,7 +50,7 @@ Class Image extends \Kodazzi\Form\Fields\File
 					/* Compara el ancho y alto de la imagen */
 					if ($width < $this->min_dimensions['width'] || $height < $this->min_dimensions['height'])
 					{
-						$this->msg_error = strtr($this->I18n->get('min_dimensions'), array('%width%' => "{$this->min_dimensions['width']}", '%height%' => $this->min_dimensions['height'] ));
+						$this->msg_error = strtr($this->I18n->get('form.min_dimensions'), array('%width%' => "{$this->min_dimensions['width']}", '%height%' => $this->min_dimensions['height'] ));
 
 						$return = false;
 					}
@@ -61,7 +61,7 @@ Class Image extends \Kodazzi\Form\Fields\File
 					/* Compara el ancho y alto de la imagen */
 					if ($width > $this->max_dimensions['width'] || $height > $this->max_dimensions['height'])
 					{
-						$this->msg_error = strtr($this->I18n->get('max_dimensions'), array('%width%' => $this->max_dimensions['width'], '%height%' => $this->max_dimensions['height'] ));
+						$this->msg_error = strtr($this->I18n->get('form.max_dimensions'), array('%width%' => $this->max_dimensions['width'], '%height%' => $this->max_dimensions['height'] ));
 
 						$return = false;
 					}
@@ -74,7 +74,7 @@ Class Image extends \Kodazzi\Form\Fields\File
 			}
 			else /* En caso de que no se cargue la imagen lanza error upload */
 			{
-				$this->msg_error = $this->I18n->get('upload');
+				$this->msg_error = $this->I18n->get('form.upload');
 
 				return false;
 			}
@@ -101,7 +101,38 @@ Class Image extends \Kodazzi\Form\Fields\File
 				));
 	}
 
-	/*
+    public function doUpload()
+    {
+        $upload = parent::doUpload();
+
+        if($upload)
+        {
+            $path_file = rtrim($this->path_upload, '/');
+            $new_path_file = $path_file;
+            $new_name = $this->new_name;
+
+            foreach($this->copys as $copy)
+            {
+                if($copy['dir'] != '/')
+                {
+                    $new_path_file = $path_file.'/'.trim($copy['dir'], '/');
+                }
+
+                $this->mkdir($new_path_file);
+
+                if(is_file("{$path_file}/{$new_name}"))
+                {
+                    // Corta y mueve la imagen
+                    $Image = new \Kodazzi\Tools\Image();
+                    $Image->loadImage("{$path_file}/{$new_name}");
+                    $Image->crop($copy['width'], $copy['height']);
+                    $Image->save("{$new_path_file}/{$new_name}", 90);
+                }
+            }
+        }
+    }
+
+	/**
 	 * @return Kodazzi\Form\Field
 	 */
 	public function setMaxDimensions($max_width, $max_height)
@@ -117,7 +148,7 @@ Class Image extends \Kodazzi\Form\Fields\File
 		throw new \Exception("Las dimensiones en el m&eacute;todo setMaxDimensions() deben ser valores enteros.");
 	}
 
-	/*
+	/**
 	 * @return Kodazzi\Form\Field
 	 */
 	public function setMinDimensions($max_width, $max_height)
@@ -132,4 +163,11 @@ Class Image extends \Kodazzi\Form\Fields\File
 
 		throw new \Exception("Las dimensiones en el m&eacute;todo setMinDimensions() deben ser valores enteros.");
 	}
+
+    public function setCopys($copys)
+    {
+        $this->copys = $copys;
+
+        return $this;
+    }
 }

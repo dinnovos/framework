@@ -189,9 +189,7 @@ Class ValidateSchema
 
 		switch ($options['relation'])
 		{
-			case 'one-to-one':
 			case 'many-to-one':
-			case 'one-to-many':
 			case 'many-to-one-self-referencing':
 
 				// El parametro model debe ser diferente a la misma

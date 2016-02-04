@@ -10,6 +10,9 @@
 
 namespace Kodazzi\Form\Fields;
 
+use Kodazzi\Container\Service;
+use Kodazzi\Orm\DatabaseManager;
+
 Class Table extends \Kodazzi\Form\Field
 {
 	protected $options = array();
@@ -29,54 +32,67 @@ Class Table extends \Kodazzi\Form\Field
 
 	public function renderField()
 	{
-		if(!$this->is_display)
+		if(! $this->is_display)
 			return '';
 
 		$format = $this->name_form . '[' . $this->name . ']';
         $id = ($this->id) ? $this->id : $this->name_form . '_' . $this->name;
 		$string = '';
-		$_data = array(); 
-		
+		$_data = array();
 		$options = $this->options;
+        $Model = null;
 
 		if(count($options) == 0)
 		{
-			$options = \AppKernel::db(  $this->name_model_relation )->fetchForOptions();
+            $Model = Service::get('database.manager')->model($this->name_model_relation, 't');
 		}
 
-		if( !$this->form->isNew() )
+		if(! $this->form->isNew())
 		{
-			$definition = $this->definition;
+            $definition = $this->definition;
+            $model = $this->form->getModel();
+            $name_primary = $model::primary;
+            $_id = $model->$name_primary;
 
-			$model = $this->form->getModel();
+            // Si se esta editando el registro
+            // Si el modelo fue iniciado
+            // Si la relacion es 'many-to-many-self-referencing'
+            // Entontes, excluye del query el ID del registro actual.
+            if($Model && $this->type_relation == 'many-to-many-self-referencing')
+            {
+                $Model->where("t.{$name_primary}", '<>', $_id);
+            }
 
-			$name_primary = $model::primary;		
-			$id = $model->$name_primary;
+            /**
+             * @var $db DatabaseManager
+             */
+            $db = Service::get('database.manager');
+            $ConnectionOptions = $db->getConnectionManager()->getConnectionOptions();
 
-			$QueryBuilder = \AppKernel::db()->getQueryBuilder();
-			$QueryBuilder->select('*');
-			$QueryBuilder->from( $definition['tableManyToMany'], 't' );
-			$QueryBuilder->where( "t.{$definition['localField']}=:{$definition['localField']}" );
-			$QueryBuilder->setParameter(":{$definition['localField']}", $id);
-			$_opt = $QueryBuilder->execute()->fetchAll();
+            // Busca los registros que han sido seleccionados
+            $_opt = $db->getQueryBuilder()->select('*')
+                                        ->from("{$ConnectionOptions['prefix']}{$definition['tableManyToMany']}", 't')
+                                        ->where("t.{$definition['localField']}=:{$definition['localField']}")
+                                        ->setParameter(":{$definition['localField']}", $_id)
+                                        ->execute()->fetchAll();
 
 			foreach( $_opt as $op )
 			{
 				$_data[] = $op[ $definition['foreignField'] ];
 			}
 		}
-		
-		foreach ( $options as $option )
-		{
-			$_value = current( $option );
-			$_option =  next( $option );
-			
-			$string .= '<span class="block">';
 
-			$string .= '<label for="' . $id . '_' . $_value . '">' . $_option . '</label>';
+        if($Model)
+        {
+            $options = $Model->getForOptions();
+        }
+
+		foreach ( $options as $_value => $_option )
+		{
+			$string .= '<label class="checkbox-inline">';
 
 			$is_active = (in_array($_value, $_data)) ? true : false;
-			
+
 			$string .= \Kodazzi\Helper\FormHtml::checkbox($format.'['.$_value.']', $_value, $is_active, array(
 									'id' => $id . '_' . $_value,
 									'class' => $this->getClassCss(),
@@ -84,9 +100,9 @@ Class Table extends \Kodazzi\Form\Field
 									'readonly' => $this->isReadonly()
 									));
 
-			$string .= '</span>';
+			$string .=  $_option.' </label>';
 		}
-		
+
 		return $string;
 	}
 	
@@ -95,19 +111,24 @@ Class Table extends \Kodazzi\Form\Field
 		$definition = $this->definition;
 		$values = $this->value;
 
-		$DriverManager = \AppKernel::db()->getDriverManager();
+        /**
+         * @var $db DatabaseManager
+         */
+        $db = Service::get('database.manager');
 
-		$DriverManager->delete( $definition['tableManyToMany'], array( $definition['localField'] => $last_id) );
+        $ConnectionOptions = $db->getConnectionManager()->getConnectionOptions();
+
+        $db->getQueryBuilder()->where("{$definition['localField']}={$last_id}")->delete("{$ConnectionOptions['prefix']}{$definition['tableManyToMany']}")->execute();
 
 		foreach($values as $value)
 		{
-			$DriverManager->insert( $definition['tableManyToMany'], array( $definition['localField'] => $last_id, $definition['foreignField'] => $value ));
+            $db->getQueryBuilder()->values(array( $definition['localField'] => $last_id, $definition['foreignField'] => $value ))->insert("{$ConnectionOptions['prefix']}{$definition['tableManyToMany']}")->execute();
 		}
 	}
 	
 	public function renderLabel($value = null, $attributes = '')
 	{
-		if (!$value)
+		if (! $value)
 		{
 			$value = $this->getValueLabel();
 		}
@@ -117,11 +138,12 @@ Class Table extends \Kodazzi\Form\Field
 	
 	public function setTypeRelation($relation)
 	{
-		if(!in_array($relation, array(
+		if(! in_array($relation, array(
 			'many-to-many',
+            'many-to-many-self-referencing'
 		)))
 		{
-			throw new Ys_Exceptions('El tipo de relacion "' . $relation . '" no es valido en el fomulario '.$this->getNameForm(), Ys_Error::UNEXPECTED);
+			throw new \Exception('El tipo de relacion "' . $relation . '" no es valido en el fomulario '.$this->getNameForm());
 		}
 		
 		$this->type_relation = $relation;

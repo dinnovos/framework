@@ -16,6 +16,8 @@
 
 namespace Kodazzi\Form;
 
+use Kodazzi\Container\Service;
+use Kodazzi\Orm\DatabaseManager;
 use Symfony\Component\HttpFoundation\Request;
 
 Class FormBuilder extends InterfaceForm
@@ -66,7 +68,7 @@ Class FormBuilder extends InterfaceForm
                         $group .= $this->renderRow($widgetTranslation);
                     }
 
-                    $string_fields .= \Service::get('view')->render('form/default_group', array(
+                    $string_fields .= Service::get('view')->render('form/default_group', array(
                         'form_group_title'      => $translation['title'],
                         'form_group_content'    => $group,
                     ));
@@ -95,7 +97,7 @@ Class FormBuilder extends InterfaceForm
             {
                 $template = $widget->getTemplate();
 
-                return \Service::get('view')->render( $template, array('widget' => $widget) );
+                return Service::get('view')->render( $template, array('widget' => $widget) );
             }
         }
 		
@@ -104,7 +106,7 @@ Class FormBuilder extends InterfaceForm
 
 	public function isNew()
 	{
-		if ( !$this->model )
+		if (! $this->model )
 			return true;
 
 		return false;
@@ -200,7 +202,7 @@ Class FormBuilder extends InterfaceForm
 
                         $translation['form']->bind($dataFormTranslation);
 
-                        if(!$translation['form']->isValid())
+                        if(! $translation['form']->isValid())
                         {
                             $this->is_valid = false;
                         }
@@ -273,7 +275,7 @@ Class FormBuilder extends InterfaceForm
                 else
                 {
                     // Si hay archivos para subir guarda el widget en un array
-                    if ( $widget->hasUpload() )
+                    if ($widget->hasUpload())
                     {
                         $this->files_uploads[$name_field] = $widget;
 
@@ -323,7 +325,11 @@ Class FormBuilder extends InterfaceForm
 				return false;
 			}
 
-			$db = \Service::get('db');
+            /**
+             * @var $db DatabaseManager
+             */
+            $db = Service::get('database.manager');
+            $db->beginTransaction();
 
 			// Si el objeto es nuevo lo crea
 			$instance = ( $this->isNew() ) ? new $this->name_model() : $this->model;
@@ -355,39 +361,48 @@ Class FormBuilder extends InterfaceForm
 			{
 				$this->msg_global_error = $this->I18n->get('form.form_internal', 'Internal Error');
 			}
-			
+
 			if( !$ok )
 				return false;
 
-			$this->identifier = $db->getIdentifier();
-            $this->instance = $instance;
-
-			if ( count( $widget_many ) )
+            try
             {
-                foreach ( $widget_many as $_widget )
+                $this->identifier = $db->getIdentifier();
+                $this->instance = $instance;
+
+                if ( count( $widget_many ) )
                 {
-                   $_widget->saveRelation( $this->identifier );
-                }
-            }
-
-            if(array_key_exists('translation', $widgets) && is_array($widgets['translation']) && $this->is_translatable)
-            {
-                $namespaceInstace = $this->getNameModel();
-                $instaceModel = new $namespaceInstace();
-
-                // Obtiene todos los registros de lenguage de la bd
-                $languages = \Service::get('db')->model($instaceModel::modelLanguage)->fetchForOptions(array(), "a.code, a.id");
-
-                foreach($widgets['translation'] as $lang => $translation)
-                {
-                    if(array_key_exists($lang, $languages))
+                    foreach ( $widget_many as $_widget )
                     {
-                        $translation['form']->setData('language_id', $languages[$lang]);
-                        $translation['form']->setData('translatable_id', $this->identifier);
-                        $translation['form']->save();
+                       //$_widget->saveRelation($this->identifier);
+                    }
+                }
+
+                if(false && array_key_exists('translation', $widgets) && is_array($widgets['translation']) && $this->is_translatable)
+                {
+                    $namespaceInstace = $this->getNameModel();
+                    $instaceModel = new $namespaceInstace();
+
+                    // Obtiene todos los registros de lenguage de la bd
+                    $languages = Service::get('database.manager')->model($instaceModel::modelLanguage)->getForOptions("a.code, a.id");
+
+                    foreach($widgets['translation'] as $lang => $translation)
+                    {
+                        if(array_key_exists($lang, $languages))
+                        {
+                            $translation['form']->setData('language_id', $languages[$lang]);
+                            $translation['form']->setData('translatable_id', $this->identifier);
+                            $translation['form']->save();
+                        }
                     }
                 }
             }
+            catch ( Exception $e )
+            {
+                $db->rollBack();
+            }
+
+            $db->commit();
 
 			return true;
 		}

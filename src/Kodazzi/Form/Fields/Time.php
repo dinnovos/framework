@@ -12,7 +12,7 @@ namespace Kodazzi\Form\Fields;
 
 Class Time extends \Kodazzi\Form\Field
 {
-    protected $format = 'H:i:s';
+    protected $format_time = 'H:i:s';
 
 	/*
 	 * Campo para hora con formato hh:mm:ss
@@ -47,7 +47,9 @@ Class Time extends \Kodazzi\Form\Field
         $format = ($this->format) ? $this->format : $this->name_form . '[' . $this->name . ']';
         $id = ($this->id) ? $this->id : $this->name_form . '_' . $this->name;
 
-		return \Kodazzi\Helper\FormHtml::input($format, \Kodazzi\Tools\Date::format($this->value, $this->format), $this->max_length, array(
+        $value = ($this->value) ? \Kodazzi\Tools\Date::format($this->value, $this->format_time) : '';
+
+		return \Kodazzi\Helper\FormHtml::input($format, $value, $this->max_length, array(
 					'id' => $id,
 					'class' => $this->getClassCss(),
 					'disabled' => $this->isDisabled(),
@@ -56,8 +58,10 @@ Class Time extends \Kodazzi\Form\Field
 				));
 	}
 
-    public function setFormatDate( $format )
+    public function setFormatDate($format)
     {
-        $this->format = $format;
+        $this->format_time = $format;
+
+        return $this;
     }
 }

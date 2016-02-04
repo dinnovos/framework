@@ -255,4 +255,22 @@ Class Util
 
         throw new \Exception("El formato '{$shortNamespace}' para el modelo no es valido.");
     }
+
+    static function getNamespaceForm($shortNamespace)
+    {
+        if(strpos($shortNamespace, ':'))
+        {
+            $p = explode(':', $shortNamespace);
+            $p[1] = ucfirst($p[1]);
+
+            if(count($p) > 2)
+            {
+                throw new \Exception("El formato '{$shortNamespace}' para el formulario no es valido.");
+            }
+
+            return "{$p[0]}\\Forms\\{$p[1]}Form";
+        }
+
+        throw new \Exception("El formato '{$shortNamespace}' para el modelo no es valido.");
+    }
 }

@@ -1,9 +1,9 @@
 [?php
 
-/*
+/**
 * This file is part of the Kodazzi Framework.
 *
-* (c) Jorge Gaitan <jgatan@kodazzi.com>
+* (c) Jorge Gaitan <info@kodazzi.com>
 *
 * For the full copyright and license information, please view the LICENSE
 * file that was distributed with this source code.
@@ -17,23 +17,36 @@
 
 namespace ##NAMESPACE##;
 
-Class ##CLASS## extends \Kodazzi\Form\FormBuilder
+use Kodazzi\Form\FormBuilder;
+
+Class ##CLASS## extends FormBuilder
 {
 	protected function config()
 	{
 		$this->setNameModel('<?php echo str_replace('/', '\\', $options['model']); ?>');
 
 <?php foreach($data['fields'] as $field => $_options){ ?>
+<?php
+    if(isset($_options['model']))
+    {
+        $model = $_options['model'];
+
+        if(strpos($_options['model'], ':') == 0)
+        {
+            $model = "{$options['namespace_bundle']}:{$model}";
+        }
+    }
+?>
 <?php if(strtoupper($_options['type']) != 'PRIMARY'){ ?>
 <?php if(strtoupper($_options['type']) == 'FILE' || strtoupper($_options['type']) == 'IMAGE') {$is_multipart = true;} ?>
 <?php if( isset($_options['type']) && $_options['type'] == 'foreign' ){ ?>
 <?php if( in_array($_options['relation'], array('many-to-one', 'one-to-one')) ){ ?>
-		$this->setWidget('<?php echo $_options['join']['name']; ?>', new \Kodazzi\Form\Fields\<?php echo ucfirst($_options['type']) ?>())<?php echo (isset($_options['notnull']) && $_options['notnull'] == false) ? '->setRequired(false)' : '' ?><?php echo (isset($_options['relation'])) ? "->setTypeRelation('".str_replace('/', '\\', $_options['relation'])."')" : ""; ?><?php echo (isset($_options['model'])) ? "->definitionRelation('".str_replace('/', '\\', $options['namespace_base_model'].$_options['model'])."Model', array('name' => '".$_options['join']['name']."', 'foreignField' => '".$_options['join']['foreignField']."') )" : ""; ?><?php echo (isset($_options['label'])) ? "->setValueLabel('".htmlentities($_options['label'], ENT_QUOTES, 'UTF-8')."')": '' ?><?php echo (isset($_options['nullable']) && $_options['nullable']) ? '->setRequired(false)' : '' ?><?php echo (isset($_options['css'])) ? "->setClassCss('{$_options['css']}')" : "" ?>;
+		$this->setWidget('<?php echo $_options['join']['name']; ?>', new \Kodazzi\Form\Fields\<?php echo ucfirst($_options['type']) ?>())<?php echo (isset($_options['notnull']) && $_options['notnull'] == false) ? '->setRequired(false)' : '' ?><?php echo (isset($_options['relation'])) ? "->setTypeRelation('".str_replace('/', '\\', $_options['relation'])."')" : ""; ?><?php echo (isset($_options['model'])) ? "->definitionRelation('{$model}', array('name' => '".$_options['join']['name']."', 'foreignField' => '".$_options['join']['foreignField']."') )" : ""; ?><?php echo (isset($_options['label'])) ? "->setValueLabel('".htmlentities($_options['label'], ENT_QUOTES, 'UTF-8')."')": '' ?><?php echo (isset($_options['nullable']) && $_options['nullable']) ? '->setRequired(false)' : '' ?><?php echo (isset($_options['css'])) ? "->setClassCss('{$_options['css']}')" : "" ?>;
 <?php }else if( $_options['relation'] == 'many-to-one-self-referencing' ){ ?>
-		$this->setWidget('<?php echo $_options['join']['name']; ?>', new \Kodazzi\Form\Fields\<?php echo ucfirst($_options['type']) ?>())<?php echo (isset($_options['relation'])) ? "->setTypeRelation('".str_replace('/', '\\', $_options['relation'])."')" : ""; ?><?php echo (isset($_options['model'])) ? "->definitionRelation('".str_replace('/', '\\', $options['namespace_base_model'].$_options['model'])."Model', array('name' => '".$_options['join']['name']."', 'foreignField' => '".$_options['join']['foreignField']."') )" : ""; ?><?php echo (isset($_options['label'])) ? "->setValueLabel('".htmlentities($_options['label'], ENT_QUOTES, 'UTF-8')."')": '' ?><?php echo '->setRequired(false)'; ?><?php echo (isset($_options['css'])) ? "->setClassCss('{$_options['css']}')" : "" ?>;
+		$this->setWidget('<?php echo $_options['join']['name']; ?>', new \Kodazzi\Form\Fields\<?php echo ucfirst($_options['type']) ?>())<?php echo (isset($_options['relation'])) ? "->setTypeRelation('".$_options['relation']."')" : ""; ?><?php echo (isset($_options['model'])) ? "->definitionRelation('{$model}', array('name' => '".$_options['join']['name']."', 'foreignField' => '".$_options['join']['foreignField']."') )" : ""; ?><?php echo (isset($_options['label'])) ? "->setValueLabel('".htmlentities($_options['label'], ENT_QUOTES, 'UTF-8')."')": '' ?><?php echo '->setRequired(false)'; ?><?php echo (isset($_options['css'])) ? "->setClassCss('{$_options['css']}')" : "" ?>;
 <?php } ?>
-<?php }else if(isset($_options['type']) && $_options['type'] == 'table' && $_options['relation'] == 'many-to-many'){?>
-		$this->setWidget('<?php echo $field; ?>', new \Kodazzi\Form\Fields\<?php echo ucfirst($_options['type']) ?>())<?php echo (isset($_options['relation'])) ? "->setTypeRelation('many-to-many')" : ""; ?><?php echo (isset($_options['model'])) ? "->definitionRelation('".$options['namespace_base_model'].$_options['model']."Model', array('tableManyToMany' => '{$_options['joinTable']['name']}', 'localField' => '".$_options['joinTable']['join']['name']."', 'foreignField' => '".$_options['joinTable']['inverseJoin']['name']."') )" : ""; ?><?php echo (isset($_options['label'])) ? "->setValueLabel('".htmlentities($_options['label'], ENT_QUOTES, 'UTF-8')."')": '' ?><?php echo (isset($_options['nullable']) && $_options['nullable']) ? '->setRequired(false)' : '' ?><?php echo (isset($_options['css'])) ? "->setClassCss('{$_options['css']}')" : "" ?>;
+<?php }else if(isset($_options['type']) && $_options['type'] == 'table' && in_array($_options['relation'], array('many-to-many', 'many-to-many-self-referencing')) ){?>
+		$this->setWidget('<?php echo $field; ?>', new \Kodazzi\Form\Fields\<?php echo ucfirst($_options['type']) ?>())<?php echo (isset($_options['relation'])) ? "->setTypeRelation('{$_options['relation']}')" : ""; ?><?php echo (isset($_options['model'])) ? "->definitionRelation('{$model}', array('tableManyToMany' => '{$_options['joinTable']['name']}', 'localField' => '".$_options['joinTable']['join']['name']."', 'foreignField' => '".$_options['joinTable']['inverseJoin']['name']."') )" : ""; ?><?php echo (isset($_options['label'])) ? "->setValueLabel('".htmlentities($_options['label'], ENT_QUOTES, 'UTF-8')."')": '' ?><?php echo (isset($_options['nullable']) && $_options['nullable']) ? '->setRequired(false)' : '' ?><?php echo (isset($_options['css'])) ? "->setClassCss('{$_options['css']}')" : "" ?>;
 <?php }else if(isset($_options['type']) && $_options['type'] == 'check'){?>
         $this->setWidget('<?php echo $field; ?>', new \Kodazzi\Form\Fields\<?php echo ucfirst($_options['type']) ?>())<?php echo (isset($_options['value']) && $_options['value'] != '') ? '->setAllowedValue("'.$_options['value'].'")' : '' ?>->setRequired(false);
 <?php }else{ ?>

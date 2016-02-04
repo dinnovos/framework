@@ -12,6 +12,7 @@ namespace Kodazzi\Form\Fields;
 
 use Kodazzi\Exception\Ys_Exceptions;
 use Kodazzi\Exception\Ys_Error;
+use Kodazzi\Container\Service;
 
 Class Foreign extends \Kodazzi\Form\Field
 {
@@ -41,7 +42,7 @@ Class Foreign extends \Kodazzi\Form\Field
 		
 		if(count($options) == 0)
 		{
-			$options = \Service::get('db')->model( $this->name_model_relation )->fetchForOptions();
+			$options = Service::get('database.manager')->model($this->name_model_relation)->getForOptions();
 		}
 
 		return \Kodazzi\Helper\FormHtml::select($format, $options, $this->value, null, array(
@@ -54,12 +55,13 @@ Class Foreign extends \Kodazzi\Form\Field
 	
 	public function setTypeRelation($relation)
 	{
-		if(!in_array($relation, array(
+		if(! in_array($relation, array(
 			'many-to-one',
-			'many-to-one-self-referencing'
+			'many-to-one-self-referencing',
+			'one-to-one',
 		)))
 		{
-			throw new \Exception( 'El tipo de relacion "' . $relation . '" no es valido en el fomulario '.$this->getNameForm() );
+			throw new \Exception('El tipo de relacion "' . $relation . '" no es valido en el fomulario '.$this->getNameForm());
 		}
 		
 		$this->type_relation = $relation;

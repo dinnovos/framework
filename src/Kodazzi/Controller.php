@@ -24,6 +24,7 @@ use Kodazzi\Session\SessionBuilder;
 use Kodazzi\Translator\TranstalorBuilder;
 use Kodazzi\View\ViewBuilder;
 use Kodazzi\Security\Card\CardManager;
+use Kodazzi\Tools\Util;
 use Service;
 
 Class Controller
@@ -110,7 +111,19 @@ Class Controller
      */
     public function getForm($namespace, $instance = null)
     {
-        return new $namespace($instance);
+        if(strpos($namespace, ':'))
+        {
+            $namespace = Util::getNamespaceForm($namespace);
+        }
+
+        if(! class_exists($namespace))
+        {
+            throw new \Exception("El modelo '{$namespace}' no fue encontrado.");
+        }
+
+        $Form = new $namespace();
+
+        return new $Form($instance);
     }
 
     /**
