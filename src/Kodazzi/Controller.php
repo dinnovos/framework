@@ -1,5 +1,5 @@
 <?php
- /**
+/**
  * This file is part of the Kodazzi Framework.
  *
  * (c) Jorge Gaitan <info@kodazzi.com>
@@ -15,13 +15,16 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Kodazzi\Config\ConfigBuilder;
 use Kodazzi\EventDispatcher\Event;
 use Kodazzi\Orm\DatabaseManager;
 use Kodazzi\Orm\Model;
 use Kodazzi\Form\FormBuilder;
 use Kodazzi\Session\SessionBuilder;
-use Kodazzi\Translator\TranstalorBuilder;
+use Kodazzi\Translator\TranslatorBuilder;
 use Kodazzi\View\ViewBuilder;
 use Kodazzi\Security\Card\CardManager;
 use Kodazzi\Tools\Util;
@@ -75,11 +78,11 @@ Class Controller
 
 
     /**
-     * @return TranstalorBuilder
+     * @return TranslatorBuilder
      */
     public function getTranstalor()
     {
-        return Service::get('translation');
+        return Service::get('translator');
     }
 
     /**
@@ -280,6 +283,27 @@ Class Controller
     {
         $DateTime = new \DateTime('NOW');
         return $DateTime->format( $string );
+    }
+
+    public function error404NotFoundException($msg = null)
+    {
+        $msg = ($msg) ? $msg : $this->getTranstalor()->get('general.error404');
+
+        throw new NotFoundHttpException($msg);
+    }
+
+    public function error403AccessDeniedException($msg = null)
+    {
+        $msg = ($msg) ? $msg : $this->getTranstalor()->get('general.error403');
+
+        throw new AccessDeniedHttpException($msg);
+    }
+
+    public function error409ConflictException($msg = null)
+    {
+        $msg = ($msg) ? $msg : $this->getTranstalor()->get('general.error409');
+
+        throw new ConflictHttpException($msg);
     }
 
     public function addMethod($method, $name)

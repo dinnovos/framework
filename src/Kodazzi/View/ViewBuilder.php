@@ -204,7 +204,9 @@ Class ViewBuilder
 
 	private function _render( $template, $data, $path = null )
 	{
-		$template = str_replace('\\', '/', $template);
+        $data = array_merge($data, array('view' => $this));
+
+        $template = str_replace('\\', '/', $template);
 
 		if( $path )
 		{
@@ -285,16 +287,12 @@ Class ViewBuilder
 		$this->User->getFlashBag()->add( 'alert-msg', array('type' => 'alert-warning', 'msg' => $msg) );
 	}
 
-	public function showMessage()
+	public function showMessages()
 	{
 		$FlashBag = $this->User->getFlashBag();
 
-		if( $FlashBag->has('alert-msg') )
-		{
-			foreach ( $FlashBag->get('alert-msg', array()) as $flash)
-			{
-				echo '<div id="ds-alert" class="alert '.$flash['type'].'">'.$flash['msg'].'</div>';
-			}
-		}
+        $messages = ($FlashBag->has('alert-msg')) ? $FlashBag->get('alert-msg', array()) : array();
+
+        print($this->render('global/floating_message', array('messages' => $messages)));
 	}
 }

@@ -60,6 +60,10 @@ Service::set('listener.postaction', function(){
     return new Kodazzi\Listeners\PostActionListener();
 });
 
+Service::set('listener.exception', function(){
+    return new Kodazzi\Listeners\ExceptionListener();
+});
+
 Service::set('event', function(){
     return new Kodazzi\EventDispatcher\Event();
 });
@@ -189,3 +193,4 @@ $dispatcher->addSubscriber(Service::get('listener.locale'));
 $dispatcher->addSubscriber(Service::get('listener.response'));
 $dispatcher->addSubscriber(Service::get('listener.subrequest'));
 $dispatcher->addSubscriber(Service::get('listener.postaction'));
+$dispatcher->addSubscriber(Service::get('listener.exception'));

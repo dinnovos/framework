@@ -14,6 +14,7 @@ namespace Kodazzi;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ControllerResolverInterface;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Kodazzi\Container\Service;
 
 class ControllerResolver implements ControllerResolverInterface
@@ -189,14 +190,16 @@ class ControllerResolver implements ControllerResolverInterface
 
             if ( !class_exists( $class_controller ) )
             {
-                throw new \Exception( 'No se encontr&oacute; el controlador - <i>' . $class_controller . '</i>' );
+                throw new NotFoundHttpException( 'No se encontro el controlador - ' . $class_controller );
             }
 
             $method_action = "$parts[2]Action";
 
             if ( !method_exists( $class_controller, $method_action ) )
             {
-                throw new \Exception( 'No se encontr&oacute; la acci&oacute;n - <b>' . $method_action . '</b> - en el controlador: <br /> <i>' . $class_controller . '</i>' );
+                throw new NotFoundHttpException( 'No se encontro la accion - ' . $method_action . ' - en el controlador: ' . $class_controller );
+
+
             }
 
             return array('bundle' => $parts[0], 'controller' => $class_controller, 'action' => $method_action, 'parts' => $parts);

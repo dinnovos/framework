@@ -80,4 +80,9 @@ Class TranslatorBuilder
 	{
         return $this->Translator->trans($key);
 	}
+
+    public function getLocale()
+    {
+        return $Translator->getLocale();
+    }
 }

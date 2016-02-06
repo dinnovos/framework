@@ -46,13 +46,13 @@ class LocaleListener implements EventSubscriberInterface
             $locale = $Route->getOption('_locale');
 
             // Si no la encuentra la optiene de la configuracion.
-            if(!$locale)
+            if(! $locale)
             {
                 $locale = $default_locale;
             }
 
             // Si no existe en la configuracion la obtiene de la peticion por defecto del componente.
-            if(!$locale)
+            if(! $locale)
             {
                 $locale = $Request->getDefaultLocale();
                 $default_locale = $Request->getDefaultLocale();
