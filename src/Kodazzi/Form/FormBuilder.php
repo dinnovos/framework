@@ -301,7 +301,7 @@ Class FormBuilder extends InterfaceForm
 		$data = $this->data;
 		$widget_many = array();
 
-		if ( $this->is_valid )
+		if ($this->is_valid)
 		{
 			$widgets = $this->getWidgets();
 
@@ -329,7 +329,6 @@ Class FormBuilder extends InterfaceForm
              * @var $db DatabaseManager
              */
             $db = Service::get('database.manager');
-            $db->beginTransaction();
 
 			// Si el objeto es nuevo lo crea
 			$instance = ( $this->isNew() ) ? new $this->name_model() : $this->model;
@@ -362,47 +361,38 @@ Class FormBuilder extends InterfaceForm
 				$this->msg_global_error = $this->I18n->get('form.form_internal', 'Internal Error');
 			}
 
-			if( !$ok )
+			if(! $ok)
 				return false;
 
-            try
+            $this->identifier = $db->getIdentifier();
+            $this->instance = $instance;
+
+            if ( count( $widget_many ) )
             {
-                $this->identifier = $db->getIdentifier();
-                $this->instance = $instance;
-
-                if ( count( $widget_many ) )
+                foreach ( $widget_many as $_widget )
                 {
-                    foreach ( $widget_many as $_widget )
-                    {
-                       //$_widget->saveRelation($this->identifier);
-                    }
+                   $_widget->saveRelation($this->identifier);
                 }
+            }
 
-                if(false && array_key_exists('translation', $widgets) && is_array($widgets['translation']) && $this->is_translatable)
+            if(array_key_exists('translation', $widgets) && is_array($widgets['translation']) && $this->is_translatable)
+            {
+                $namespaceInstace = $this->getNameModel();
+                $instaceModel = new $namespaceInstace();
+
+                // Obtiene todos los registros de lenguage de la bd
+                $languages = Service::get('database.manager')->model($instaceModel::modelLanguage)->getForOptions("a.code, a.id");
+
+                foreach($widgets['translation'] as $lang => $translation)
                 {
-                    $namespaceInstace = $this->getNameModel();
-                    $instaceModel = new $namespaceInstace();
-
-                    // Obtiene todos los registros de lenguage de la bd
-                    $languages = Service::get('database.manager')->model($instaceModel::modelLanguage)->getForOptions("a.code, a.id");
-
-                    foreach($widgets['translation'] as $lang => $translation)
+                    if(array_key_exists($lang, $languages))
                     {
-                        if(array_key_exists($lang, $languages))
-                        {
-                            $translation['form']->setData('language_id', $languages[$lang]);
-                            $translation['form']->setData('translatable_id', $this->identifier);
-                            $translation['form']->save();
-                        }
+                        $translation['form']->setData('language_id', $languages[$lang]);
+                        $translation['form']->setData('translatable_id', $this->identifier);
+                        $translation['form']->save();
                     }
                 }
             }
-            catch ( Exception $e )
-            {
-                $db->rollBack();
-            }
-
-            $db->commit();
 
 			return true;
 		}

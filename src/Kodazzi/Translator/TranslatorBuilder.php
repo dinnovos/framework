@@ -18,6 +18,7 @@ namespace Kodazzi\Translator;
 
 use Symfony\Component\Translation\Translator;
 use Symfony\Component\Translation\Loader\ArrayLoader;
+use Symfony\Component\Translation\MessageCatalogue;
 use Symfony\Component\Finder\Finder;
 use Kodazzi\Container\Service;
 
@@ -80,6 +81,14 @@ Class TranslatorBuilder
 	{
         return $this->Translator->trans($key);
 	}
+
+    /**
+     * @return MessageCatalogue
+     */
+    public function getCatalogue()
+    {
+        return $this->Translator->getCatalogue();
+    }
 
     public function getLocale()
     {

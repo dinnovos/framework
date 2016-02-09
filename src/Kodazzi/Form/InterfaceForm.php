@@ -16,6 +16,7 @@
 
 namespace Kodazzi\Form;
 
+use Kodazzi\Translator\TranslatorBuilder;
 use Kodazzi\Form\Field;
 use Kodazzi\Container\Service;
 
@@ -35,7 +36,12 @@ Class InterfaceForm implements \ArrayAccess
 	protected $clean_data = array();
 	protected $validators = array();
 	protected $Kernel;
+
+    /**
+     * @var TranslatorBuilder
+     */
 	protected $I18n;
+
 	protected $files_uploads = array();
 	protected $identifier = null;
 	protected $instance = null;
@@ -135,16 +141,26 @@ Class InterfaceForm implements \ArrayAccess
 		$this->name_model = $namespace;
 	}
 
-	public function setWidget( $name, Field $widget )
+	public function setWidget($name, Field $widget)
 	{
-		$widget->setName( strtolower($name) );
-		$widget->setNameForm( $this->name_form );
-		$widget->setForm( $this );
-		$widget->setI18n( $this->I18n );
-		$widget->setConfig( $this->config_fields );
-		$widget->setPathUpload( $this->path_upload );
+        $nameTranslation = null;
+        $keyTranslation = $this->getNameForm().'.'.$name;
 
-		$this->widgets[ $name ] = $widget;
+        // Verifica si en el catalog existe una traduccion para el campo.
+        if($this->I18n->getCatalogue()->has($keyTranslation))
+        {
+            $nameTranslation = $this->I18n->get($keyTranslation);
+        }
+
+		$widget->setName(strtolower($name));
+		$widget->setValueLabel($nameTranslation);
+		$widget->setNameForm($this->name_form);
+		$widget->setForm($this);
+		$widget->setI18n($this->I18n);
+		$widget->setConfig($this->config_fields);
+		$widget->setPathUpload($this->path_upload);
+
+		$this->widgets[$name] = $widget;
 
 		return $widget;
 	}

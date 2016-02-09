@@ -64,7 +64,7 @@ Class FormsCommand extends Command
         }
         if($version != 'current')
         {
-			while( !preg_match('/^([1-9][0-9\.]+[0-9])+$/', $version) )
+			while(! preg_match('/^([1-9][0-9\.]+[0-9])+$/', $version) )
 			{
 				$output->writeln( PHP_EOL .' <error>ATENCION: La version no tiene un formato valido, debe ingrear por ejemplo: 1.0</error>' );
 
@@ -120,6 +120,7 @@ Class FormsCommand extends Command
         }
 
         $this->createForms( $input, $output, $bundle, $schema_bundle );
+        $this->createFormsI18n( $input, $output, $bundle, $schema_bundle );
 	}
 
 	private function createForms( $input, $output, $bundle, $schema )
@@ -168,8 +169,45 @@ Class FormsCommand extends Command
 			$output->write( " - Clase Form '" . ucfirst( $table ) . "FormBase' creada correctamente." . PHP_EOL );
 		}
 
-		$output->write( PHP_EOL . PHP_EOL );
+		$output->write( PHP_EOL );
 	}
+
+    private function createFormsI18n( $input, $output, $bundle, $schema )
+    {
+        $GenerateClass = Service::get( 'generate_class' );
+
+        $path = Ki_BUNDLES . $bundle . '/i18n/es/';
+
+        /* Crea el directorio donde se crearan las clases de los formularios */
+        $this->mkdir($path);
+
+        $output->write( PHP_EOL . "Lista de archivos catalogo de tranduccion para los formularios:" . PHP_EOL );
+
+        foreach ( $schema as $table => $options )
+        {
+            if(strpos($table, ':'))
+            {
+                $p = explode(':', $table);
+
+                $table = $p[1];
+            }
+
+            // Para evitar sobreescribir el archivo
+            if (! is_file( $path . ucfirst( $table ) . 'Form.i18n.php' ) )
+            {
+                $GenerateClass->setTemplate('FormI18n');
+                $GenerateClass->setValues( array(
+                    'form' => ucfirst( $table ).'Form'
+                ) );
+
+                $GenerateClass->create( $path . ucfirst( $table ) . 'Form.i18n', $options );
+
+                $output->write( " - Archivo Traduccion '" . ucfirst( $table ) . "Form.i18n' fue creada correctamente." . PHP_EOL );
+            }
+        }
+
+        $output->write( PHP_EOL . PHP_EOL );
+    }
 
 	private function  mkdir( $path )
 	{
