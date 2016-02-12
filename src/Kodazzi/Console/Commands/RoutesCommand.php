@@ -75,7 +75,8 @@ Class RoutesCommand extends Command
             $_requirements = $Route->getRequirements();
             $requirements = null;
 
-            $name = ($local) ? str_replace("-{$local}", '', $name) : $name;
+            $nameAndPath = ($local) ? str_replace("-{$local}", '', $name) : $name;
+            $nameAndPath .= ":\n  $path \n";
 
             foreach($_requirements as $var => $patt)
             {
@@ -85,8 +86,7 @@ Class RoutesCommand extends Command
             $requirements = ($requirements) ? rtrim($requirements, ',') : '';
 
             $rows[] = array(
-                $name,
-                $path,
+                $nameAndPath,
                 $controller,
                 $local,
                 $methods,
@@ -98,7 +98,7 @@ Class RoutesCommand extends Command
         }
 
         $io->table(
-            array('Name', 'Path', 'Controller', 'Local', 'Methods', 'Host', 'Schemes', 'Requirements'),
+            array('Name and Path', 'Controller', 'Local', 'Methods', 'Host', 'Schemes', 'Requirements'),
             $rows
         );
 
