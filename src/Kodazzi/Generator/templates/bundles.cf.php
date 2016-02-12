@@ -8,8 +8,8 @@
  * file that was distributed with this source code.
  */
 
-use Kodazzi\Container\Service;
-
-Service::Routing()
-->add('<?php echo $options['route'] ?>')
-->path('/<?php echo $options['route'] ?>')->controller('<?php echo $options['bundle'] ?>:Home:index')->ok();
+return [
+<?php foreach($data['bundles'] as $bundle):?>
+    new <?php echo $bundle; ?>\HookBundle(),
+<?php endforeach; ?>
+];

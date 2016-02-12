@@ -191,7 +191,7 @@ Class Util
         $bundles_activated = array();
         $action = strtolower($action);
 
-        if(!in_array($action, array('new', 'delete', 'deactivate')))
+        if(! in_array($action, array('new', 'delete', 'deactivate')))
         {
             throw new Exception( "El par&aacute;metro para el m&eacute;todo debe ser 'new' o 'delete'" );
         }
@@ -217,16 +217,14 @@ Class Util
 
         // Crea la clase AppKernel
         $GenerateClass = \Service::get('generate_class');
-        $GenerateClass->setTemplate('AppKernel');
-        $GenerateClass->setNameClass('AppKernel');
-        $GenerateClass->setNameClassExtend('Kernel');
-        $GenerateClass->create(Ki_APP. 'AppKernel', array('bundles'=>$bundles_activated));
+        $GenerateClass->setTemplate('bundles.cf');
+        $GenerateClass->create(Ki_APP. 'config/bundles.cf', array('bundles'=>$bundles_activated));
 
         // Elimina el directorio del bundle
-        if($action == 'delete' && is_dir(Ki_BUNDLES.str_replace('\\', '/', $namespace)))
+        if($action == 'delete' && is_dir(Ki_BUNDLES.$namespace))
         {
             $fs = new \Symfony\Component\Filesystem\Filesystem();
-            $fs->remove(Ki_BUNDLES.str_replace('\\', '/', $namespace));
+            $fs->remove(Ki_BUNDLES.$namespace);
         }
     }
 
