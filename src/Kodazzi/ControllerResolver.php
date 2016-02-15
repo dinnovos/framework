@@ -205,6 +205,6 @@ class ControllerResolver implements ControllerResolverInterface
             return array('bundle' => $parts[0], 'controller' => $class_controller, 'action' => $method_action, 'parts' => $parts);
         }
 
-        throw new \Exception("El path al controlador '$controller' no es v&aacute;lida.");
+        throw new \Exception("El path al controlador '$controller' no es valida.");
     }
 }
