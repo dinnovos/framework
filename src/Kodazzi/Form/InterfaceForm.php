@@ -300,7 +300,7 @@ Class InterfaceForm implements \ArrayAccess
         // Si el formulario tiene una instancia del modelo lo utiliza
         if($this->model)
         {
-            $model = (isset($this->model->Translation) && is_array($this->model->Translation)) ? $this->model->Translation : array();
+            $model = (isset($this->model->Translations) && is_array($this->model->Translations)) ? $this->model->Translations : array();
         }
 
         foreach($languages as $lang)
@@ -332,7 +332,7 @@ Class InterfaceForm implements \ArrayAccess
         }
 
         // Elimina de la instancia del modelo la data de los formularios translation
-        unset($this->model->Translation);
+        unset($this->model->Translations);
 
         $this->is_translatable = true;
         $this->widgets = $Widgets;
