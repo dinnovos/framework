@@ -164,7 +164,7 @@ Class Routing
         {
             $name = $this->name;
 
-            if(!isset($this->default['controller']))
+            if(! preg_match('/^(\@default)/', $name) && ! isset($this->default['controller']))
                 throw new \Exception( "En la ruta '$name'' debe agregar un controlador." );
 
             if($path['lang'])
