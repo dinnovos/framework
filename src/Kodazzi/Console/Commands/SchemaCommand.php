@@ -149,7 +149,7 @@ Class SchemaCommand extends Command
 	private function createSchema( $input, $output, $path_schema, $schema, $behavior )
 	{
 		$GenerateClass = Service::get('generate_class');
-        $connectionOptions = (Ki_ENVIRONMENT == 'prod') ? Service::get('config')->get('db', 'prod') :  Service::get('config')->get('db', 'dev') ;
+        $connectionOptions = Service::get('config')->get('db', 'dev');
         $connectionOptions = (array_key_exists('default', $connectionOptions)) ? $connectionOptions['default'] : current($connectionOptions);
 
         $prefix = (array_key_exists('prefix', $connectionOptions)) ? $connectionOptions['prefix'] : '';
