@@ -31,4 +31,22 @@ class ActiveRecord
     {
         return $this->getDatabaseManager()->model($this);
     }
+
+    /**
+     * @return string
+     */
+    public function getTable()
+    {
+        $properties = $this->getModel()->getPropertiesInstance();
+
+        return $properties['table'];
+    }
+
+    /**
+     * @return array
+     */
+    public function getPropertiesInstance()
+    {
+        return $this->getModel()->getPropertiesInstance();
+    }
 } 
