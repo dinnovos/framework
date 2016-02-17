@@ -59,24 +59,24 @@ Class ViewBuilder
 
         if($enabled_path_themes)
         {
-            if(is_dir(Ki_BUNDLES.$theme_web.'/layouts'))
+            if(is_dir(Ki_THEMES.$theme_web.'/layouts'))
             {
-                $path_templates[] = Ki_BUNDLES.$theme_web.'/layouts';
+                $path_templates[] = Ki_THEMES.$theme_web.'/layouts';
             }
 
-            if(is_dir(Ki_BUNDLES.$theme_web.'/templates'))
+            if(is_dir(Ki_THEMES.$theme_web.'/templates'))
             {
-                $path_templates[] = Ki_BUNDLES.$theme_web.'/templates';
+                $path_templates[] = Ki_THEMES.$theme_web.'/templates';
             }
 
-            if(is_dir(Ki_BUNDLES.$theme_admin.'/layouts'))
+            if(is_dir(Ki_THEMES.$theme_admin.'/layouts'))
             {
-                $path_templates[] = Ki_BUNDLES.$theme_admin.'/layouts';
+                $path_templates[] = Ki_THEMES.$theme_admin.'/layouts';
             }
 
-            if(is_dir(Ki_BUNDLES.$theme_admin.'/templates'))
+            if(is_dir(Ki_THEMES.$theme_admin.'/templates'))
             {
-                $path_templates[] = Ki_BUNDLES.$theme_admin.'/templates';
+                $path_templates[] = Ki_THEMES.$theme_admin.'/templates';
             }
         }
 
@@ -254,7 +254,7 @@ Class ViewBuilder
                     }
 
                     $parts[0] = ltrim(str_replace(array('@admin', '@web'), '', $parts[0]), '/');
-                    $path = Ki_BUNDLES.$theme.'/'.$parts[0].'/views/'.strtolower($tpl);
+                    $path = Ki_THEMES.$theme.'/'.$parts[0].'/views/'.strtolower($tpl);
                 }
 
 				$this->Twig_Loader_Filesystem->addPath($path);
