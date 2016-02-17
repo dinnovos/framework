@@ -12,6 +12,7 @@ namespace Kodazzi\Container;
 
 use Kodazzi\Container\ServiceContainerInterface;
 use Kodazzi\Routing\Routing;
+use Kodazzi\Orm\DatabaseManager;
 
 Class Service
 {
@@ -128,5 +129,13 @@ Class Service
     public static function Routing()
     {
         return self::get('routing');
+    }
+
+    /**
+     * @return DatabaseManager
+     */
+    public static function getDatabaseManager()
+    {
+        return self::get('database.manager');
     }
 }
