@@ -121,7 +121,7 @@ Class Controller
 
         if(! class_exists($namespace))
         {
-            throw new \Exception("El modelo '{$namespace}' no fue encontrado.");
+            throw new \Exception("El formulario '{$namespace}' no fue encontrado.");
         }
 
         $Form = new $namespace();
