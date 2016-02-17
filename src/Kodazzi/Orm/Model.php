@@ -164,7 +164,17 @@ class Model
 
     public function where($condition, $operator = null, $value = null)
     {
-        $this->buildWhere($condition, $operator, $value, 'where');
+        if(is_array($condition))
+        {
+            foreach($condition as $f => $v)
+            {
+                $this->buildWhere($f, '=', $v, 'and_where');
+            }
+        }
+        else
+        {
+            $this->buildWhere($condition, $operator, $value, 'where');
+        }
 
         return $this;
     }
@@ -452,6 +462,7 @@ class Model
     public function getTranslation($lang)
     {
         $QueryBuilder = $this->getQueryBuilder();
+
         $modelTranslation = ($this->propertiesInstance['model_translation']) ? Util::getNamespaceModel($this->propertiesInstance['model_translation']) : null;
         $modelLanguage = ($this->propertiesInstance['model_language']) ? Util::getNamespaceModel($this->propertiesInstance['model_language']) : null;
 
@@ -472,6 +483,11 @@ class Model
         $QueryBuilder->setParameter(":code", $lang);
 
         return $this;
+    }
+
+    public function getPropertiesInstance()
+    {
+        return $this->propertiesInstance;
     }
 
 	/**************************************************************************************************************/
