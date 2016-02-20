@@ -10,7 +10,7 @@
 
 namespace Kodazzi\View;
 
-use Service;
+use Kodazzi\Container\Service;
 use Kodazzi\Config\ConfigBuilderInterface;
 use Kodazzi\Session\User;
 use Symfony\Component\Routing\Generator\UrlGenerator;
@@ -142,6 +142,11 @@ Class ViewBuilder
             return ucfirst($string);
         });
 
+        // Funcion para acceder al catalogo de traduccion.
+        $i18n = new \Twig_SimpleFunction('i18n', function ( $string ) {
+            return Service::get('translator')->get($string);
+        });
+
         // Funcion para indicar si existe un archivo
         $dump = new \Twig_SimpleFunction('dump', function ( $var ) {
             ob_start();
@@ -160,6 +165,7 @@ Class ViewBuilder
 		$Twig->addFunction( $date_format );
 		$Twig->addFunction( $hash );
 		$Twig->addFunction( $ucfirst );
+		$Twig->addFunction( $i18n );
 		$Twig->addFunction( $dump );
 
 		$this->Twig_Loader_Filesystem = $Twig_Loader_Filesystem;

@@ -459,7 +459,7 @@ class Model
         return $this->propertiesInstance['instance'];
     }
 
-    public function getTranslation($lang)
+    public function getTranslation($lang, $alias = 'b')
     {
         $QueryBuilder = $this->getQueryBuilder();
 
@@ -471,15 +471,15 @@ class Model
 
         if($modelTranslation)
         {
-            $QueryBuilder->join($this->propertiesInstance['alias'], $this->propertiesInstance['prefix'].$instanceModelTranslation::table, 'b', "{$this->propertiesInstance['alias']}.{$this->propertiesInstance['primary']}=b.translatable_id");
+            $QueryBuilder->join($this->propertiesInstance['alias'], $this->propertiesInstance['prefix'].$instanceModelTranslation::table, $alias, "{$this->propertiesInstance['alias']}.{$this->propertiesInstance['primary']}={$alias}.translatable_id");
         }
 
         if($modelLanguage)
         {
-            $QueryBuilder->join('b', $this->propertiesInstance['prefix'].$instanceModelLanguage::table, 'c', "c.".$instanceModelLanguage::primary."=b.language_id");
+            $QueryBuilder->join($alias, $this->propertiesInstance['prefix'].$instanceModelLanguage::table, 'lg', "lg.".$instanceModelLanguage::primary."={$alias}.language_id");
         }
 
-        $QueryBuilder->andWhere("c.code=:code");
+        $QueryBuilder->andWhere("lg.code=:code");
         $QueryBuilder->setParameter(":code", $lang);
 
         return $this;

@@ -60,6 +60,11 @@ Class Controller
         $this->getSession()->setLocale($locale);
     }
 
+    public function getLocale()
+    {
+        $this->getSession()->getLocale();
+    }
+
    /**
     * @return SessionBuilder
     */
@@ -229,10 +234,9 @@ Class Controller
         return new RedirectResponse( $url, $status );
     }
 
-    public function jsonResponse($data)
+    public function jsonResponse($data = null, $status = 200, $headers = array())
     {
-        $response = new JsonResponse();
-        $response->setData( $data );
+        $response = new JsonResponse($data, $status, $headers);
 
         return $response;
     }
