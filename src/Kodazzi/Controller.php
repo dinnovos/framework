@@ -62,7 +62,7 @@ Class Controller
 
     public function getLocale()
     {
-        $this->getSession()->getLocale();
+        return $this->getSession()->getLocale();
     }
 
    /**
@@ -202,7 +202,7 @@ Class Controller
 
     public function isAjax()
     {
-        return Service::get('kernel.request')->isXmlHttpRequest();
+        return $this->getRequest()->isXmlHttpRequest();
     }
 
     public function isPost()

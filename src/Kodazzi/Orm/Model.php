@@ -124,7 +124,10 @@ class Model
 
     public function getSQL()
     {
-        return $this->buildQuery()->getSQL();
+        return array(
+            'query'         => $this->buildQuery()->getSQL(),
+            'parameters'    => $this->buildQuery()->getParameters()
+        );
     }
 
     public function count()
@@ -512,7 +515,15 @@ class Model
 
         if($method == 'WHERE')
         {
-            $QueryBuilder->where($condition);
+            // Verifica que si existe un where para agregar un "AND WHERE"
+            if(count($QueryBuilder->getQueryPart('where')) > 0)
+            {
+                $QueryBuilder->andWhere($condition);
+            }
+            else
+            {
+                $QueryBuilder->where($condition);
+            }
         }
         else if($method == 'AND_WHERE')
         {
