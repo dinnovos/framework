@@ -17,7 +17,7 @@ $<?php echo $model ?> = $schema->createTable("<?php echo $options['_prefix']?><?
 <?php $primary[] = $field; ?>
 <?php } ?>
 <?php if($config['type'] == 'primary' ){ ?>
-$<?php echo $model ?>->addColumn("<?php echo $field ?>", "integer", array("unsigned" => true, "autoincrement" => true));
+$<?php echo $model ?>->addColumn("<?php echo $field ?>", "integer", array("unsigned" => true <?php echo ( isset($config['autoincrement']) && $config['autoincrement'])?', "autoincrement" => true' : ''; ?>));
 <?php } elseif( in_array($config['type'] , array('title', 'string', 'name', 'email', 'login', 'password', 'url', 'file', 'image') ) ){ ?>
 $<?php echo $model ?>->addColumn("<?php echo $field ?>", "string", array("length" => <?php echo $config['length'] ?>, 'notnull' => <?php echo ( isset($config['notnull']) && !$config['notnull']) ? 'false' : 'true'; ?>));
 <?php } elseif( $config['type'] == 'integer' ){ ?>

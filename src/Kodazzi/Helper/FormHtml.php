@@ -159,6 +159,11 @@ Class FormHtml
 			$str_attribute .= 'readonly ';
 		}
 
+        if ( isset( $attribute['placeholder'] ) && $attribute['placeholder'] )
+        {
+            $str_attribute .= "placeholder='{$attribute['placeholder']}' ";
+        }
+
 		return "<input type=\"password\" name=\"$name\"  $str_attribute value=\"$value\" maxlength=\"$maxlength\" />";
 	}
 

@@ -117,7 +117,7 @@ Class ValidateSchema
                 }
 
                 // Agrega el campo primary
-                $this->schema[$table.'Translation']['fields']['id'] = array('type' => 'primary', 'strategy' => 'identity');
+                $this->schema[$table.'Translation']['fields']['id'] = array('type' => 'primary', 'autoincrement' => true);
 
                 // Agrega los campos translation=true
                 foreach($fields_translation as $a => $b)
