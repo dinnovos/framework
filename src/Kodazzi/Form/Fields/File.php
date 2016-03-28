@@ -30,6 +30,13 @@ Class File extends \Kodazzi\Form\Field
 	{
 		$value = $this->value;
 
+		if( ($this->value instanceof UploadedFile) )
+		{
+			$this->msg_error = $this->I18n->get('form.file');
+
+			return false;
+		}
+
 		$OriginalName = $value->getClientOriginalName();
 		$OriginalExtension = $value->getClientOriginalExtension();
 		$Size = $value->getClientSize();
@@ -100,15 +107,15 @@ Class File extends \Kodazzi\Form\Field
 		if(!$this->is_display)
 			return '';
 
-        $format = ($this->format) ? $this->format : $this->name_form . '[' . $this->name . ']';
-        $id = ($this->id) ? $this->id : $this->name_form . '_' . $this->name;
+		$format = ($this->format) ? $this->format : $this->name_form . '[' . $this->name . ']';
+		$id = ($this->id) ? $this->id : $this->name_form . '_' . $this->name;
 
 		return \Kodazzi\Helper\FormHtml::file($format, null, array(
-					'id' => $id,
-					'class' => $this->getClassCss(),
-					'disabled' => $this->isDisabled(),
-					'readonly' => $this->isReadonly()
-				));
+			'id' => $id,
+			'class' => $this->getClassCss(),
+			'disabled' => $this->isDisabled(),
+			'readonly' => $this->isReadonly()
+		));
 	}
 
 	public function getNewName()
