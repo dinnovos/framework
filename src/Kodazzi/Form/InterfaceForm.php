@@ -10,7 +10,7 @@
 
 /**
  * Ys_InterfaceForm
- * 
+ *
  * @author Jorge Gaitan
  */
 
@@ -25,6 +25,7 @@ Class InterfaceForm implements \ArrayAccess
 	protected $widgets = array();
 	protected $name_form = null;
 	protected $method = 'post';
+	protected $template_row = null;
 	protected $name_model = null;
 	protected $model = null;
 	protected $csrf_token = null;
@@ -37,9 +38,9 @@ Class InterfaceForm implements \ArrayAccess
 	protected $validators = array();
 	protected $Kernel;
 
-    /**
-     * @var TranslatorBuilder
-     */
+	/**
+	 * @var TranslatorBuilder
+	 */
 	protected $I18n;
 
 	protected $files_uploads = array();
@@ -52,7 +53,7 @@ Class InterfaceForm implements \ArrayAccess
 	public function __construct( $instance_model = null )
 	{
 		$this->I18n = Service::get('translator');
-		
+
 		// token para campo csrf del form
 		$this->csrf_token = sha1( get_class($this) );
 
@@ -68,36 +69,41 @@ Class InterfaceForm implements \ArrayAccess
 		// Crea el widget para seguridad de ataque csrf
 		$this->setWidget('csrf_token', new \Kodazzi\Form\Fields\Csfr())->setValue($this->csrf_token);
 
-        $this->setModel($instance_model);
+		$this->setModel($instance_model);
 	}
 
-    public function setModel($instance_model)
-    {
-        if($instance_model)
-        {
-            if(is_object($instance_model) && get_class($instance_model) == $this->name_model)
-            {
-                $this->model = $instance_model;
-            }
-            else
-            {
-                throw new \Exception( "No es un modelo valido para el formulario ". $this->name_form );
-            }
-        }
+	public function setTemplateRow($template)
+	{
+		$this->template_row = $template;
+	}
 
-        if($this->model)
-        {
-            $widgets = $this->widgets;
+	public function setModel($instance_model)
+	{
+		if($instance_model)
+		{
+			if(is_object($instance_model) && get_class($instance_model) == $this->name_model)
+			{
+				$this->model = $instance_model;
+			}
+			else
+			{
+				throw new \Exception( "No es un modelo valido para el formulario ". $this->name_form );
+			}
+		}
 
-            foreach ($widgets as $name_field => $widget)
-            {
-                if( isset( $this->model->$name_field ) )
-                {
-                    $widget->setValue($this->model->$name_field);
-                }
-            }
-        }
-    }
+		if($this->model)
+		{
+			$widgets = $this->widgets;
+
+			foreach ($widgets as $name_field => $widget)
+			{
+				if( isset( $this->model->$name_field ) )
+				{
+					$widget->setValue($this->model->$name_field);
+				}
+			}
+		}
+	}
 
 	public function offsetSet( $offset, $widget )
 	{
@@ -133,24 +139,24 @@ Class InterfaceForm implements \ArrayAccess
 
 	public function setNameModel( $namespace )
 	{
-        if(strpos($namespace, ':'))
-        {
-            $namespace = \Kodazzi\Tools\Util::getNamespaceModel($namespace);
-        }
+		if(strpos($namespace, ':'))
+		{
+			$namespace = \Kodazzi\Tools\Util::getNamespaceModel($namespace);
+		}
 
 		$this->name_model = $namespace;
 	}
 
 	public function setWidget($name, Field $widget)
 	{
-        $nameTranslation = null;
-        $keyTranslation = $this->getNameForm().'.'.$name;
+		$nameTranslation = null;
+		$keyTranslation = $this->getNameForm().'.'.$name;
 
-        // Verifica si en el catalog existe una traduccion para el campo.
-        if($this->I18n->getCatalogue()->has($keyTranslation))
-        {
-            $nameTranslation = $this->I18n->get($keyTranslation);
-        }
+		// Verifica si en el catalog existe una traduccion para el campo.
+		if($this->I18n->getCatalogue()->has($keyTranslation))
+		{
+			$nameTranslation = $this->I18n->get($keyTranslation);
+		}
 
 		$widget->setName(strtolower($name));
 		$widget->setValueLabel($nameTranslation);
@@ -196,16 +202,16 @@ Class InterfaceForm implements \ArrayAccess
 		throw new \Exception("El campo '$field' no es v&aacute;lido.");
 	}
 
-    public function setValid($is_valid, $msg = null)
-    {
-        $this->is_valid = (is_bool($is_valid)) ? $is_valid : true;
-        $this->msg_global_error = $msg;
-    }
+	public function setValid($is_valid, $msg = null)
+	{
+		$this->is_valid = (is_bool($is_valid)) ? $is_valid : true;
+		$this->msg_global_error = $msg;
+	}
 
-    public function setData($key, $value)
-    {
-        $this->data[$key] = $value;
-    }
+	public function setData($key, $value)
+	{
+		$this->data[$key] = $value;
+	}
 
 	/************************************************************************/
 
@@ -239,32 +245,32 @@ Class InterfaceForm implements \ArrayAccess
 	{
 		return $this->msg_global_error;
 	}
-	
+
 	public function getNameModel()
 	{
 		return $this->name_model;
 	}
-	
+
 	public function getModel()
 	{
 		return $this->model;
 	}
-	
+
 	public function getNameForm()
 	{
 		return $this->name_form;
 	}
-	
+
 	public function getIdentifier()
 	{
 		return $this->identifier;
 	}
 
-    public function getInstance()
-    {
-        return $this->instance;
-    }
-	
+	public function getInstance()
+	{
+		return $this->instance;
+	}
+
 	public function getData()
 	{
 		return $this->data;
@@ -287,54 +293,66 @@ Class InterfaceForm implements \ArrayAccess
 		return ($this->is_multipart) ? true : false;
 	}
 
-    public function mergeTranslation()
-    {
-        $namespaceInstace = $this->getNameModel();
-        $instaceModel = new $namespaceInstace();
-        $Widgets = $this->getWidgets();
+	public function mergeTranslation()
+	{
+		$namespaceInstace = $this->getNameModel();
+		$instaceModel = new $namespaceInstace();
+		$Widgets = $this->getWidgets();
 
-        // Obtiene todos los registros de lenguage de la bd
-        $languages = \Service::get('database.manager')->model($instaceModel::modelLanguage)->get();
-        $model = array();
+		// Obtiene todos los registros de lenguage de la bd
+		$languages = \Service::get('database.manager')->model($instaceModel::modelLanguage)->get();
+		$model = array();
 
-        // Si el formulario tiene una instancia del modelo lo utiliza
-        if($this->model)
-        {
-            $model = (isset($this->model->Translations) && is_array($this->model->Translations)) ? $this->model->Translations : array();
-        }
+		// Si el formulario tiene una instancia del modelo lo utiliza
+		if($this->model)
+		{
+			$model = (isset($this->model->Translations) && is_array($this->model->Translations)) ? $this->model->Translations : array();
+		}
 
-        foreach($languages as $lang)
-        {
-            $instanceTranslation = $this->getTranslationForm();
-            $WidgetsTranslation = $instanceTranslation->getWidgets();
+		foreach($languages as $lang)
+		{
+			$instanceTranslation = $this->getTranslationForm();
+			$WidgetsTranslation = $instanceTranslation->getWidgets();
 
-            // Verifica si existe una instancia del modelo para el formulario y lo agrega.
-            if(count($model) && array_key_exists($lang->code, $model))
-            {
-                $instanceTranslation->setModel($model[$lang->code]);
-            }
+			// Verifica si existe una instancia del modelo para el formulario y lo agrega.
+			if(count($model) && array_key_exists($lang->code, $model))
+			{
+				$instanceTranslation->setModel($model[$lang->code]);
+			}
 
-            foreach($WidgetsTranslation as $field => $Widget)
-            {
-                // Oculta los campos translatable_id, language_id y csrf_token del formulario translation
-                if(in_array($field, array('translatable_id', 'language_id')) || $Widget->getName() == 'csrf_token')
-                {
-                    $Widget->setDisplay(false);
-                }
+			foreach($WidgetsTranslation as $field => $Widget)
+			{
+				// Oculta los campos translatable_id, language_id y csrf_token del formulario translation
+				if(in_array($field, array('translatable_id', 'language_id')) || $Widget->getName() == 'csrf_token')
+				{
+					$Widget->setDisplay(false);
+				}
 
-                // Cambia el formato del campo para incorporar la clave del lenguage.
-                $Widget->setFormat($instanceTranslation->getNameForm().'['.$lang->code.']['.$Widget->getName().']');
-                $Widget->setId($instanceTranslation->getNameForm().'_'.$lang->code.'_'.$Widget->getName());
-            }
+				// Cambia el formato del campo para incorporar la clave del lenguage.
+				$Widget->setFormat($instanceTranslation->getNameForm().'['.$lang->code.']['.$Widget->getName().']');
+				$Widget->setId($instanceTranslation->getNameForm().'_'.$lang->code.'_'.$Widget->getName());
+			}
 
-            $Widgets['translation'][$lang->code]['title'] = $lang->name;
-            $Widgets['translation'][$lang->code]['form'] = $instanceTranslation;
-        }
+			$Widgets['translation'][$lang->code]['title'] = $lang->name;
+			$Widgets['translation'][$lang->code]['form'] = $instanceTranslation;
+		}
 
-        // Elimina de la instancia del modelo la data de los formularios translation
-        unset($this->model->Translations);
+		// Elimina de la instancia del modelo la data de los formularios translation
+		unset($this->model->Translations);
 
-        $this->is_translatable = true;
-        $this->widgets = $Widgets;
-    }
+		$this->is_translatable = true;
+		$this->widgets = $Widgets;
+	}
+
+	public function getFormsTranslations()
+	{
+		$Widgets = $this->getWidgets();
+
+		if(array_key_exists('translation', $Widgets))
+		{
+			return $Widgets['translation'];
+		}
+
+		return array();
+	}
 }

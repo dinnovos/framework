@@ -30,7 +30,7 @@ Class File extends \Kodazzi\Form\Field
 	{
 		$value = $this->value;
 
-		if( ($this->value instanceof UploadedFile) )
+		if( ! ($this->value instanceof UploadedFile) )
 		{
 			$this->msg_error = $this->I18n->get('form.file');
 

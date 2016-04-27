@@ -20,7 +20,7 @@ Class Title extends \Kodazzi\Form\Field
 	 */
 	public function valid()
 	{
-		$default = '^[\w\s\-\_\&\;\#\.]+$';
+		$default = '^[\w\s\/\-\_\&\;\:\#\.\,\?\¿\!\¡\(\)\{\}\[\]]+$';
 
         // Reemplaza todas las vocales acentuadas
         $value = \Kodazzi\Tools\StringProcessor::replaceVowels( $this->value );

@@ -10,7 +10,7 @@
 
 /**
  * Form
- * 
+ *
  * @author Jorge Gaitan
  */
 
@@ -22,18 +22,18 @@ use Symfony\Component\HttpFoundation\Request;
 
 Class FormBuilder extends InterfaceForm
 {
-	private $has_data = false;
+    private $has_data = false;
 
-	public function render()
-	{
-		$string_fields = '';
-		$string_fields_hidden = '';
+    public function render()
+    {
+        $string_fields = '';
+        $string_fields_hidden = '';
         $group = '';
 
-		$widgets = $this->widgets;
+        $widgets = $this->widgets;
 
-		foreach ($widgets as $field => $widget)
-		{
+        foreach ($widgets as $field => $widget)
+        {
             if(is_object($widget))
             {
                 // Crea los campos ocultos
@@ -74,15 +74,21 @@ Class FormBuilder extends InterfaceForm
                     ));
                 }
             }
-		}
+        }
 
-		return $string_fields . $string_fields_hidden;
-	}
+        return $string_fields . $string_fields_hidden;
+    }
 
-	public function renderRow( \Kodazzi\Form\Field $widget )
-	{
+    public function renderRow( \Kodazzi\Form\Field $widget )
+    {
         if($widget->isDisplay())
         {
+            // Si el formulario tiene una plantilla para todos los campos la agrega.
+            if($this->template_row)
+            {
+                $widget->setTemplate($this->template_row);
+            }
+
             if ( $widget->isHidden() )
             {
                 $format = ($widget->getFormat()) ? $widget->getFormat() : $this->name_form . '[' . $widget->getName() . ']';
@@ -100,36 +106,36 @@ Class FormBuilder extends InterfaceForm
                 return Service::get('view')->render( $template, array('widget' => $widget) );
             }
         }
-		
-		return '';
-	}
 
-	public function isNew()
-	{
-		if (! $this->model )
-			return true;
+        return '';
+    }
 
-		return false;
-	}
+    public function isNew()
+    {
+        if (! $this->model )
+            return true;
 
-	public function bind( $post, $files = array() )
-	{
-		$name_form = $this->name_form;
-		$array_post = array();
-		$array_files = array();
+        return false;
+    }
+
+    public function bind( $post, $files = array() )
+    {
+        $name_form = $this->name_form;
+        $array_post = array();
+        $array_files = array();
 
         if(array_key_exists($name_form, $post))
-		{
-			$array_post = $post[$name_form];
-			$this->has_data = true;
-		}
+        {
+            $array_post = $post[$name_form];
+            $this->has_data = true;
+        }
 
         if(array_key_exists($name_form, $files))
-		{
-			$array_files = $files[$name_form];
-		}
+        {
+            $array_files = $files[$name_form];
+        }
 
-		$this->data = array_merge($array_post, $array_files);
+        $this->data = array_merge($array_post, $array_files);
 
         if($this->is_translatable)
         {
@@ -142,50 +148,50 @@ Class FormBuilder extends InterfaceForm
         }
 
         return $this->has_data;
-	}
+    }
 
-	public function bindRequest( Request $request )
-	{
-		$post = $request->request->all();
-		$files = $request->files->all();
+    public function bindRequest( Request $request )
+    {
+        $post = $request->request->all();
+        $files = $request->files->all();
 
         $this->bind($post, $files);
 
         return $this->has_data;
-	}
+    }
 
-	public function isValid()
-	{
-		$data = $this->data;
-		$widgets = $this->widgets;
+    public function isValid()
+    {
+        $data = $this->data;
+        $widgets = $this->widgets;
 
-		// Esta propiedad se actualiza en el  metodo bindRequest
-		if( !$this->has_data )
-		{
-			return;
-		}
+        // Esta propiedad se actualiza en el  metodo bindRequest
+        if( !$this->has_data )
+        {
+            return;
+        }
 
-		// Si el formulario esta vacio
-		if ( count( $data ) == 0 )
-		{
-			$this->msg_global_error = $this->I18n->get('form_empty');
-			$this->all_errors['empty'] =  $this->msg_global_error;
+        // Si el formulario esta vacio
+        if ( count( $data ) == 0 )
+        {
+            $this->msg_global_error = $this->I18n->get('form_empty');
+            $this->all_errors['empty'] =  $this->msg_global_error;
 
-			return $this->is_valid = false;
-		}
+            return $this->is_valid = false;
+        }
 
-		// Si el formulario no contiene su token o es invalido
-		if (!isset($data['csrf_token']) || $data['csrf_token'] != $this->csrf_token)
-		{
-			$this->msg_global_error = $this->I18n->get('csrf');
-			$this->all_errors['csrf'] = $this->msg_global_error;
+        // Si el formulario no contiene su token o es invalido
+        if (!isset($data['csrf_token']) || $data['csrf_token'] != $this->csrf_token)
+        {
+            $this->msg_global_error = $this->I18n->get('csrf');
+            $this->all_errors['csrf'] = $this->msg_global_error;
 
-			return $this->is_valid = false;
-		}
+            return $this->is_valid = false;
+        }
 
-		// Valida cada campo enviado
-		foreach ($widgets as $name_field => $widget)
-		{
+        // Valida cada campo enviado
+        foreach ($widgets as $name_field => $widget)
+        {
             if(is_object($widget))
             {
                 $this->validateField($widget, $data);
@@ -209,15 +215,15 @@ Class FormBuilder extends InterfaceForm
                     }
                 }
             }
-		}
+        }
 
-		if ($this->is_valid)
-		{
-			$this->data = $this->clean_data;
-		}
+        if ($this->is_valid)
+        {
+            $this->data = $this->clean_data;
+        }
 
-		return $this->is_valid;
-	}
+        return $this->is_valid;
+    }
 
     public function validateField(\Kodazzi\Form\Field $widget, $data)
     {
@@ -296,44 +302,44 @@ Class FormBuilder extends InterfaceForm
         }
     }
 
-	public function save()
-	{
-		$data = $this->data;
-		$widget_many = array();
+    public function save()
+    {
+        $data = $this->data;
+        $widget_many = array();
 
-		if ($this->is_valid)
-		{
-			$widgets = $this->getWidgets();
+        if ($this->is_valid)
+        {
+            $widgets = $this->getWidgets();
 
-			// Elimina el campo de verificacion csfr del formulario
-			unset( $data['csrf_token'] );
-			
-			$files_uploads = $this->files_uploads;
+            // Elimina el campo de verificacion csfr del formulario
+            unset( $data['csrf_token'] );
 
-			foreach($files_uploads as $field => $widget)
-			{
-				$widget->doUpload();
-			}
+            $files_uploads = $this->files_uploads;
 
-			// Se limpia el atributo con lo archivos para subir
-			$this->files_uploads = array();
+            foreach($files_uploads as $field => $widget)
+            {
+                $widget->doUpload();
+            }
 
-			// Si no existen valores para guardar returna false
-			// Esta verificacion se debe hacer despues de eliminar el campo csrf_token
-			if ( count($data) == 0 )
-			{
-				return false;
-			}
+            // Se limpia el atributo con lo archivos para subir
+            $this->files_uploads = array();
+
+            // Si no existen valores para guardar returna false
+            // Esta verificacion se debe hacer despues de eliminar el campo csrf_token
+            if ( count($data) == 0 )
+            {
+                return false;
+            }
 
             /**
              * @var $db DatabaseManager
              */
             $db = Service::get('database.manager');
 
-			// Si el objeto es nuevo lo crea
-			$instance = ( $this->isNew() ) ? new $this->name_model() : $this->model;
+            // Si el objeto es nuevo lo crea
+            $instance = ( $this->isNew() ) ? new $this->name_model() : $this->model;
 
-			foreach ($widgets as $field => $widget)
+            foreach ($widgets as $field => $widget)
             {
                 if(is_object($widget))
                 {
@@ -352,17 +358,17 @@ Class FormBuilder extends InterfaceForm
                 }
             }
 
-			try
-			{
-				$ok = $db->save($instance);
-			}
-			catch ( Exception $e )
-			{
-				$this->msg_global_error = $this->I18n->get('form.form_internal', 'Internal Error');
-			}
+            try
+            {
+                $ok = $db->save($instance);
+            }
+            catch ( Exception $e )
+            {
+                $this->msg_global_error = $this->I18n->get('form.form_internal', 'Internal Error');
+            }
 
-			if(! $ok)
-				return false;
+            if(! $ok)
+                return false;
 
             $this->identifier = $db->getIdentifier();
             $this->instance = $instance;
@@ -371,7 +377,7 @@ Class FormBuilder extends InterfaceForm
             {
                 foreach ( $widget_many as $_widget )
                 {
-                   $_widget->saveRelation($this->identifier);
+                    $_widget->saveRelation($this->identifier);
                 }
             }
 
@@ -394,9 +400,9 @@ Class FormBuilder extends InterfaceForm
                 }
             }
 
-			return true;
-		}
-		
-		return false;
-	}
+            return true;
+        }
+
+        return false;
+    }
 }
