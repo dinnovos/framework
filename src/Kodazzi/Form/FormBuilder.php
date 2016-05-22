@@ -94,7 +94,7 @@ Class FormBuilder extends InterfaceForm
                 $format = ($widget->getFormat()) ? $widget->getFormat() : $this->name_form . '[' . $widget->getName() . ']';
 
                 return \Kodazzi\Helper\FormHtml::hidden($format, $widget->getValue(), $widget->getMaxlength(), array(
-                        'id' => $this->name_form . '_' . $widget->getName(),
+                        'id' => ($widget->getId()) ? $widget->getId() : $this->name_form . '_' . $widget->getName(),
                         'class' => $widget->getClassCss()
                     )
                 );

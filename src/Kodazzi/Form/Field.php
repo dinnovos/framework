@@ -459,6 +459,11 @@ abstract Class Field
 		return $this->name_form . '_' . $this->name;
 	}
 
+	public function getId()
+	{
+		return $this->id;
+	}
+
 	public function getName()
 	{
 		return $this->name;
